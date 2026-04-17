@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: fleet-management-platform
+
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+
+server:
+  port: ${SERVER_PORT:8080}
+app:
+
+  jwt:
+    onboarding-secret: ${ONBOARDING_JWT_SECRET}
+    onboarding-expiration-ms: 600000

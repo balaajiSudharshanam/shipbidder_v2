@@ -1,0 +1,13 @@
+package com.fleetplatform.fleet_management_platform.user.api;
+
+import com.fleetplatform.fleet_management_platform.user.domain.UserRole;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class UserResponse {
+    private String email;
+    private String name;
+    private UserRole role;
+}
