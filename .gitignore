@@ -34,3 +34,5 @@ build/
 .env
 target/
 .idea/
+logs/
+.claude/

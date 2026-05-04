@@ -1,6 +1,9 @@
 package com.fleetplatform.fleet_management_platform.user.application;
 
 import com.fleetplatform.fleet_management_platform.auth.application.OnboardingTokenService;
+import com.fleetplatform.fleet_management_platform.common.exception.BadRequestException;
+import com.fleetplatform.fleet_management_platform.common.exception.ConflictException;
+import com.fleetplatform.fleet_management_platform.common.exception.UnauthorizedException;
 import com.fleetplatform.fleet_management_platform.user.domain.User;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRepository;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRole;
@@ -16,22 +19,22 @@ public class UserService {
 
     public UserRole updateRole(String onboardingToken, String role) {
         if (onboardingToken == null || onboardingToken.isBlank()) {
-            throw new RuntimeException("Missing onboarding token");
+            throw new UnauthorizedException("Missing onboarding token");
         }
 
         Long userId = onboardingTokenService.extractUserId(onboardingToken);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
 
         if (user.getRole() != UserRole.UNASSIGNED) {
-            throw new RuntimeException("Role already assigned");
+            throw new ConflictException("Role already assigned");
         }
 
         UserRole newRole = parseRole(role);
 
         if (newRole == UserRole.UNASSIGNED) {
-            throw new RuntimeException("Cannot assign UNASSIGNED role");
+            throw new BadRequestException("Cannot assign UNASSIGNED role");
         }
 
         user.setRole(newRole);
@@ -52,7 +55,7 @@ public class UserService {
         try {
             return UserRole.valueOf(role.toUpperCase());
         } catch (Exception e) {
-            throw new RuntimeException("Invalid role: " + role);
+            throw new BadRequestException("Invalid role: " + role);
         }
     }
 }

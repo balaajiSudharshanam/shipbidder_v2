@@ -53,24 +53,20 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         });
 
-        if(savedUser.getRole()==UserRole.UNASSIGNED){
-            System.out.print("saving user");
+        if (savedUser.getRole() == UserRole.UNASSIGNED) {
             String token = onboardingTokenService.generateToken(savedUser);
 
             Cookie onboardingCookie = new Cookie("onboarding_token", token);
             onboardingCookie.setHttpOnly(true);
-            onboardingCookie.setSecure(false); // set true in production with HTTPS
+            onboardingCookie.setSecure(false);
             onboardingCookie.setPath("/");
             onboardingCookie.setMaxAge(10 * 60);
-
             response.addCookie(onboardingCookie);
 
-//            response.sendRedirect(frontendUrl + "/select-role");
+            response.sendRedirect(ApiRoutes.Auth.BASE + ApiRoutes.Auth.LOGIN_SUCCESS);
             return;
-
         }
-        String token= onboardingTokenService.generateToken(savedUser);
 
-        response.sendRedirect(ApiRoutes.Auth.AUTH_SUCESS+ token);
+        response.sendRedirect(ApiRoutes.Auth.BASE + ApiRoutes.Auth.LOGIN_SUCCESS);
     }
 }
