@@ -5,6 +5,7 @@ public class ApiRoutes {
     public static class Auth {
         public static final String BASE = "/api/auth";
         public static final String REGISTER = "/register";
+        public static final String LOGIN = "/login";
         public static final String LOGIN_SUCCESS = "/login-success";
     }
 

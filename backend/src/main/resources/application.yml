@@ -32,7 +32,8 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 app:
-
   jwt:
     onboarding-secret: ${ONBOARDING_JWT_SECRET}
     onboarding-expiration-ms: 600000
+    auth-secret: ${AUTH_JWT_SECRET}
+    auth-expiration-ms: 86400000

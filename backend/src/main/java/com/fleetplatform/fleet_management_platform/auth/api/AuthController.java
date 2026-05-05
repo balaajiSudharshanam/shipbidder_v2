@@ -1,6 +1,7 @@
 package com.fleetplatform.fleet_management_platform.auth.api;
 
 import com.fleetplatform.fleet_management_platform.auth.application.AuthService;
+import com.fleetplatform.fleet_management_platform.auth.application.LoginResult;
 import com.fleetplatform.fleet_management_platform.common.ApiRoutes;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +35,31 @@ public class AuthController {
         response.addCookie(cookie);
 
         return new RegisterResponse("Registration successful. Please select your role.");
+    }
+
+    @PostMapping(ApiRoutes.Auth.LOGIN)
+    public LoginResponse login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response
+    ) {
+        LoginResult result = authService.login(request.getEmail(), request.getPassword());
+
+        Cookie cookie;
+        if (result.requiresOnboarding()) {
+            cookie = new Cookie("onboarding_token", result.token());
+            cookie.setMaxAge(10 * 60);
+        } else {
+            cookie = new Cookie("auth_token", result.token());
+            cookie.setMaxAge(24 * 60 * 60);
+        }
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return result.requiresOnboarding()
+                ? new LoginResponse("Please complete your profile.", "ONBOARDING_REQUIRED")
+                : new LoginResponse("Login successful.", "SUCCESS");
     }
 
     @GetMapping(ApiRoutes.Auth.LOGIN_SUCCESS)
