@@ -26,6 +26,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final OnboardingTokenService onboardingTokenService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
@@ -63,10 +66,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             onboardingCookie.setMaxAge(10 * 60);
             response.addCookie(onboardingCookie);
 
-            response.sendRedirect(ApiRoutes.Auth.BASE + ApiRoutes.Auth.LOGIN_SUCCESS);
+            response.sendRedirect(frontendUrl + "/select-role");
             return;
         }
 
-        response.sendRedirect(ApiRoutes.Auth.BASE + ApiRoutes.Auth.LOGIN_SUCCESS);
+        response.sendRedirect(frontendUrl + "/");
     }
 }
