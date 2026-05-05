@@ -1,5 +1,7 @@
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import type { FormEvent } from 'react'
+import { AppRoutes } from '../../../common/appRoutes'
 import { register } from '../api/authApi'
 
 export default function RegisterPage() {
@@ -16,7 +18,7 @@ export default function RegisterPage() {
     setLoading(true)
     try {
       await register(name, email, password)
-      navigate('/select-role')
+      navigate(AppRoutes.SELECT_ROLE)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
@@ -24,77 +26,71 @@ export default function RegisterPage() {
     }
   }
 
-  function handleGoogleRegister() {
-    window.location.href = '/oauth2/authorization/google'
-  }
-
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div className="card shadow-sm" style={{ width: '100%', maxWidth: 420 }}>
-        <div className="card-body p-4">
-          <h4 className="card-title mb-1 fw-bold">Create an account</h4>
-          <p className="text-muted mb-4 small">Get started with ShipBidder</p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="card-fleet">
+        <h2 style={{ color: 'var(--c-light)', fontWeight: 700, marginBottom: '0.25rem' }}>
+          Create an account
+        </h2>
+        <p style={{ color: 'rgba(243,243,243,0.5)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+          Get started with ShipBidder
+        </p>
 
-          {error && <div className="alert alert-danger py-2 small">{error}</div>}
+        {error && <div className="alert-fleet">{error}</div>}
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label small fw-semibold">Full name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Jane Doe"
-                required
-                autoFocus
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label small fw-semibold">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="form-label small fw-semibold">Password</label>
-              <input
-                type="password"
-                className="form-control"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Min. 8 characters"
-                required
-                minLength={8}
-              />
-            </div>
-            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-              {loading ? 'Creating account…' : 'Create account'}
-            </button>
-          </form>
-
-          <div className="d-flex align-items-center my-3">
-            <hr className="flex-grow-1" />
-            <span className="px-2 text-muted small">or</span>
-            <hr className="flex-grow-1" />
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '1rem' }}>
+            <label className="form-label">Full name</label>
+            <input
+              type="text"
+              className="form-control"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Jane Doe"
+              required
+              autoFocus
+            />
           </div>
-
-          <button className="btn btn-outline-secondary w-100" onClick={handleGoogleRegister}>
-            Continue with Google
+          <div style={{ marginBottom: '1rem' }}>
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-control"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="form-control"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Min. 8 characters"
+              required
+              minLength={8}
+            />
+          </div>
+          <button type="submit" className="btn-fleet" disabled={loading}>
+            {loading ? 'Creating account…' : 'Create account'}
           </button>
+        </form>
 
-          <p className="text-center text-muted small mt-3 mb-0">
-            Already have an account?{' '}
-            <Link to="/login" className="text-decoration-none">
-              Sign in
-            </Link>
-          </p>
-        </div>
+        <div className="divider">or</div>
+
+        <button
+          className="btn-fleet-outline"
+          onClick={() => { window.location.href = '/oauth2/authorization/google' }}
+        >
+          Continue with Google
+        </button>
+
+        <p style={{ textAlign: 'center', fontSize: '0.875rem', color: 'rgba(243,243,243,0.5)', marginTop: '1.25rem', marginBottom: 0 }}>
+          Already have an account? <Link to={AppRoutes.LOGIN}>Sign in</Link>
+        </p>
       </div>
     </div>
   )

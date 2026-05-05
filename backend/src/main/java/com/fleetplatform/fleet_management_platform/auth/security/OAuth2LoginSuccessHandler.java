@@ -70,6 +70,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
 
-        response.sendRedirect(frontendUrl + "/");
+        response.sendRedirect(frontendUrl + "/dashboard");
     }
 }

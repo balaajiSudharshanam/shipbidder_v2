@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { updateRole, Role } from '../../user/api/userApi'
+import type { Role } from '../../user/api/userApi'
+import { AppRoutes } from '../../../common/appRoutes'
+import { updateRole } from '../../user/api/userApi'
 
 interface RoleCard {
   role: Role
   title: string
   subtitle: string
   description: string
-  icon: string
 }
 
 const ROLES: RoleCard[] = [
@@ -15,17 +16,13 @@ const ROLES: RoleCard[] = [
     role: 'JOB_POSTER',
     title: 'Job Poster',
     subtitle: 'Post shipping jobs',
-    description:
-      'Post freight jobs, receive competitive bids from verified carriers, and manage your shipments end-to-end.',
-    icon: '📦',
+    description: 'Post freight jobs, receive competitive bids from verified carriers, and manage your shipments end-to-end.',
   },
   {
     role: 'BIDDER',
     title: 'Carrier',
     subtitle: 'Bid on jobs',
-    description:
-      'Browse available freight jobs, place bids, optimise your routes, and grow your trucking business.',
-    icon: '🚚',
+    description: 'Browse available freight jobs, place bids, optimise your routes, and grow your trucking business.',
   },
 ]
 
@@ -41,7 +38,7 @@ export default function SelectRolePage() {
     setLoading(true)
     try {
       await updateRole(selected)
-      navigate('/')
+      navigate(AppRoutes.DASHBOARD)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to set role')
     } finally {
@@ -50,46 +47,50 @@ export default function SelectRolePage() {
   }
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div style={{ width: '100%', maxWidth: 700 }} className="px-3">
-        <div className="text-center mb-5">
-          <h3 className="fw-bold">How will you use ShipBidder?</h3>
-          <p className="text-muted">Choose your role — you can only select this once.</p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ width: '100%', maxWidth: 680 }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h2 style={{ color: 'var(--c-dark)', fontWeight: 700, fontSize: '1.75rem', marginBottom: '0.5rem' }}>
+            How will you use ShipBidder?
+          </h2>
+          <p style={{ color: 'rgba(28,27,27,0.5)', fontSize: '0.95rem', margin: 0 }}>
+            Choose your role — you can only select this once.
+          </p>
         </div>
 
-        {error && <div className="alert alert-danger py-2 small text-center">{error}</div>}
+        {error && <div className="alert-fleet" style={{ textAlign: 'center' }}>{error}</div>}
 
-        <div className="row g-4 mb-4">
-          {ROLES.map(({ role, title, subtitle, description, icon }) => (
-            <div className="col-md-6" key={role}>
-              <div
-                className={`card h-100 cursor-pointer border-2 ${
-                  selected === role ? 'border-primary' : 'border-light'
-                }`}
-                style={{ cursor: 'pointer', transition: 'border-color 0.15s' }}
-                onClick={() => setSelected(role)}
-              >
-                <div className="card-body p-4">
-                  <div className="mb-3" style={{ fontSize: '2.5rem' }}>{icon}</div>
-                  <h5 className="fw-bold mb-1">{title}</h5>
-                  <p className="text-primary small fw-semibold mb-2">{subtitle}</p>
-                  <p className="text-muted small mb-0">{description}</p>
-                </div>
-                {selected === role && (
-                  <div className="card-footer bg-primary bg-opacity-10 border-0 text-center py-2">
-                    <span className="text-primary small fw-semibold">✓ Selected</span>
-                  </div>
-                )}
-              </div>
-            </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+          {ROLES.map(({ role, title, subtitle, description }) => (
+            <button
+              key={role}
+              onClick={() => setSelected(role)}
+              style={{
+                background: selected === role ? 'var(--c-mid)' : 'rgba(71,69,69,0.08)',
+                border: selected === role ? '2px solid var(--c-dark)' : '2px solid rgba(28,27,27,0.12)',
+                borderRadius: 12,
+                padding: '1.75rem',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'border-color 0.15s, background 0.15s',
+              }}
+            >
+              <div style={{ color: selected === role ? 'var(--c-light)' : 'var(--c-dark)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.2rem' }}>{title}</div>
+              <div style={{ color: selected === role ? 'rgba(243,243,243,0.6)' : 'rgba(28,27,27,0.45)', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{subtitle}</div>
+              <div style={{ color: selected === role ? 'rgba(243,243,243,0.75)' : 'rgba(28,27,27,0.6)', fontSize: '0.9rem', lineHeight: 1.5 }}>{description}</div>
+              {selected === role && (
+                <div style={{ marginTop: '1rem', color: 'var(--c-light)', fontSize: '0.85rem', fontWeight: 600 }}>✓ Selected</div>
+              )}
+            </button>
           ))}
         </div>
 
-        <div className="text-center">
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
           <button
-            className="btn btn-primary px-5"
+            className="btn-fleet"
             onClick={handleConfirm}
             disabled={!selected || loading}
+            style={{ maxWidth: 240 }}
           >
             {loading ? 'Saving…' : 'Confirm role'}
           </button>

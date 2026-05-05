@@ -1,12 +1,13 @@
-const BASE = '/api/auth'
+import { ApiRoutes } from '../../../common/apiRoutes'
 
 export interface LoginResponse {
   message: string
   status: 'SUCCESS' | 'ONBOARDING_REQUIRED'
+  role: string | null
 }
 
 export async function register(name: string, email: string, password: string): Promise<void> {
-  const res = await fetch(`${BASE}/register`, {
+  const res = await fetch(`${ApiRoutes.Auth.BASE}${ApiRoutes.Auth.REGISTER}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -19,7 +20,7 @@ export async function register(name: string, email: string, password: string): P
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${BASE}/login`, {
+  const res = await fetch(`${ApiRoutes.Auth.BASE}${ApiRoutes.Auth.LOGIN}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',

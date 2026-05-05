@@ -58,8 +58,8 @@ public class AuthController {
         response.addCookie(cookie);
 
         return result.requiresOnboarding()
-                ? new LoginResponse("Please complete your profile.", "ONBOARDING_REQUIRED")
-                : new LoginResponse("Login successful.", "SUCCESS");
+                ? new LoginResponse("Please complete your profile.", "ONBOARDING_REQUIRED", null)
+                : new LoginResponse("Login successful.", "SUCCESS", result.role());
     }
 
     @GetMapping(ApiRoutes.Auth.LOGIN_SUCCESS)

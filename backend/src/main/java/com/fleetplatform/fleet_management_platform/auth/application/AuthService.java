@@ -55,9 +55,9 @@ public class AuthService {
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
         if (user.getRole() == UserRole.UNASSIGNED) {
-            return new LoginResult(onboardingTokenService.generateToken(user), true);
+            return new LoginResult(onboardingTokenService.generateToken(user), true, null);
         }
 
-        return new LoginResult(jwtService.generateToken(user), false);
+        return new LoginResult(jwtService.generateToken(user), false, user.getRole().name());
     }
 }

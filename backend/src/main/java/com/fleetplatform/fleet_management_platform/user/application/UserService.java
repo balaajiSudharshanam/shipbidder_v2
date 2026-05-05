@@ -4,9 +4,11 @@ import com.fleetplatform.fleet_management_platform.auth.application.OnboardingTo
 import com.fleetplatform.fleet_management_platform.common.exception.BadRequestException;
 import com.fleetplatform.fleet_management_platform.common.exception.ConflictException;
 import com.fleetplatform.fleet_management_platform.common.exception.UnauthorizedException;
+import com.fleetplatform.fleet_management_platform.user.api.UserResponse;
 import com.fleetplatform.fleet_management_platform.user.domain.User;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRepository;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRole;
+import com.fleetplatform.fleet_management_platform.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final OnboardingTokenService onboardingTokenService;
+
+    public UserResponse getMe(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+        return UserMapper.toResponse(user);
+    }
 
     public UserRole updateRole(String onboardingToken, String role) {
         if (onboardingToken == null || onboardingToken.isBlank()) {
@@ -41,14 +49,6 @@ public class UserService {
         userRepository.save(user);
 
         return newRole;
-
-    }
-
-    private String extractBearerToken(String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-        return authorizationHeader.substring(7);
     }
 
     private UserRole parseRole(String role) {
