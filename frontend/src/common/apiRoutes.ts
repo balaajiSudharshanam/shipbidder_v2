@@ -9,4 +9,9 @@ export const ApiRoutes = {
     ME: '/me',
     UPDATE_ROLE: '/update-role',
   },
+  Job: {
+    BASE: '/api/jobs',
+    BY_ID: (id: number) => `/${id}`,
+    MY: '/my',
+  },
 } as const

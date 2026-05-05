@@ -14,4 +14,10 @@ public class ApiRoutes {
         public static final String ME = "/me";
         public static final String UPDATE_ROLE = "/update-role";
     }
+
+    public static class Job {
+        public static final String BASE = "/api/jobs";
+        public static final String BY_ID = "/{id}";
+        public static final String MY = "/my";
+    }
 }
