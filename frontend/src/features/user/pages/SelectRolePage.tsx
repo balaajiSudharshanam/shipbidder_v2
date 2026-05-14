@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import type { Role } from '../../user/api/userApi'
+
 import { AppRoutes } from '../../../common/appRoutes'
+import { useUser } from '../context/UserContext'
 import { updateRole } from '../../user/api/userApi'
 
 interface RoleCard {
@@ -28,6 +31,7 @@ const ROLES: RoleCard[] = [
 
 export default function SelectRolePage() {
   const navigate = useNavigate()
+  const { refreshUser } = useUser()
   const [selected, setSelected] = useState<Role | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,6 +42,7 @@ export default function SelectRolePage() {
     setLoading(true)
     try {
       await updateRole(selected)
+      await refreshUser()
       navigate(AppRoutes.DASHBOARD)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to set role')

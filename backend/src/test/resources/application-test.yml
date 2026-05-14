@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:fleettest;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  h2:
+    console:
+      enabled: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+app:
+  jwt:
+    onboarding-secret: test-onboarding-secret-key-at-least-32-characters-long
+    onboarding-expiration-ms: 600000
+    auth-secret: test-auth-secret-key-at-least-32-characters-long
+    auth-expiration-ms: 86400000

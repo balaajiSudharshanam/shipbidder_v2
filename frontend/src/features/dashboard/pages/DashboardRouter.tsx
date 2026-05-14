@@ -1,22 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { UserProfile } from '../../user/api/userApi'
+
 import { AppRoutes } from '../../../common/appRoutes'
-import { getMe } from '../../user/api/userApi'
-import JobPosterDashboard from './JobPosterDashboard'
+import { useUser } from '../../user/context/UserContext'
+
 import CarrierDashboard from './CarrierDashboard'
+import JobPosterDashboard from './JobPosterDashboard'
 
 export default function DashboardRouter() {
   const navigate = useNavigate()
-  const [user, setUser] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, loading } = useUser()
 
   useEffect(() => {
-    getMe()
-      .then(setUser)
-      .catch(() => navigate(AppRoutes.LOGIN, { replace: true }))
-      .finally(() => setLoading(false))
-  }, [navigate])
+    if (!loading && !user) navigate(AppRoutes.LOGIN, { replace: true })
+  }, [loading, user, navigate])
 
   if (loading) {
     return (
