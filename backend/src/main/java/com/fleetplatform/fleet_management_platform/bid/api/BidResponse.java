@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BidResponse {
     private Long id;
+    private Long jobId;
     private Long bidderId;
     private String bidderName;
     private String bidderEmail;

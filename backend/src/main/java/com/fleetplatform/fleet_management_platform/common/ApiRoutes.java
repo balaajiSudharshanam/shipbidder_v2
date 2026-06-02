@@ -20,6 +20,8 @@ public class ApiRoutes {
         public static final String BY_ID = "/{id}";
         public static final String MY = "/my";
         public static final String BY_ID_IMAGES = "/{id}/images";
+        public static final String BIDS = "/bids";
+        public static final String BIDS_MY = "/bids/my";
         public static final String BY_ID_BIDS = "/{id}/bids";
     }
 

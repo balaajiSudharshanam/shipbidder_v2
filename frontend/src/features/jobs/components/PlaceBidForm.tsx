@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useToast } from '../../../common/context/ToastContext'
+import { useUser } from '../../user/context/UserContext'
 import { placeBid } from '../api/bidsApi'
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 
 export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionClosesAt, onBidPlaced }: Props) {
   const { showError } = useToast()
+  const { user } = useUser()
   const [amount, setAmount] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -25,9 +27,13 @@ export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionC
       showError('Please enter a valid bid amount')
       return
     }
+    if (!user) {
+      showError('You must be logged in to place a bid')
+      return
+    }
     setSubmitting(true)
     try {
-      await placeBid(jobId, parsed)
+      await placeBid(user.id, jobId, parsed)
       setSuccess(true)
       setAmount('')
       onBidPlaced()

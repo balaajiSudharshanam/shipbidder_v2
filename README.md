@@ -210,8 +210,9 @@ docker compose -f docker-compose.yml up --build -d
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/jobs/{id}/bids` | BIDDER | Place a bid on a job |
-| `GET` | `/api/jobs/{id}/bids` | JOB_POSTER (owner) | View all bids, sorted lowest first |
+| `POST` | `/api/jobs/bids` | BIDDER | Place a bid — body: `{userId, jobId, amount}` |
+| `GET` | `/api/jobs/bids/my` | BIDDER | List my own bids, newest first |
+| `GET` | `/api/jobs/{id}/bids` | JOB_POSTER (owner) | View all bids for a job, sorted lowest first |
 
 ### Locations
 
@@ -305,6 +306,46 @@ Real bugs hit during development, documented here as a reference.
 **Root cause:** Vite replaces `import.meta.env.VITE_*` variables at **build time**, not runtime. The root `.env` file sits outside the `frontend/` directory, which is the Docker build context. The variable was never injected into the image.
 
 **Fix:** Added an `ARG VITE_GOOGLE_MAPS_API_KEY` and corresponding `ENV` to the frontend `Dockerfile` so the value is baked in during `docker build`. For production it is passed via `args:` in `docker-compose.yml`; for development it is set under `environment:` in `docker-compose.override.yml` (Vite dev server reads it at runtime so no rebuild is needed).
+
+---
+
+### 7. Active Bids count always showed 0 on the carrier dashboard
+
+**Symptom:** After a driver placed a bid, the "Active Bids" stat card on the carrier dashboard stayed at 0.
+
+**Root cause:** The stat cards were backed by a hardcoded static array `[{ label: 'Active Bids', value: '0' }, ...]`. No API call was made to fetch the driver's own bids.
+
+**Fix:** Added `GET /api/jobs/bids/my` (BIDDER role) backed by `BidRepository.findByBidderEmailOrderByCreatedAtDesc`. The carrier dashboard now fetches this on mount and derives **Active Bids** (PENDING), **Jobs Won** (ACCEPTED), and **Total Bids** from the real response. The "My Bids" section was also wired up to show actual bid rows instead of a static placeholder.
+
+---
+
+### 8. `userId` not available in the frontend for placing a bid
+
+**Symptom:** After changing `POST /api/jobs/bids` to accept `{userId, jobId, amount}` in the body, the frontend had no way to know its own user ID — `GET /api/user/me` only returned `email`, `name`, and `role`.
+
+**Root cause:** `UserResponse` and `UserMapper` were built before the bid domain existed and never included the database `id`. The frontend `UserProfile` type matched.
+
+**Fix:** Added `id: Long` to `UserResponse`, updated `UserMapper.toResponse` to pass `user.getId()`, and added `id: number` to the frontend `UserProfile` type. `PlaceBidForm` now reads `user.id` from `UserContext` and includes it in the bid request body.
+
+---
+
+### 9. Nav bar duplicated across every page
+
+**Symptom:** `CarrierDashboard`, `JobPosterDashboard`, and `JobsPage` each defined their own local `DashboardNav` or inline `<nav>` block. Any styling change had to be applied in three places.
+
+**Root cause:** No shared nav component existed; each page copy-pasted the structure with slight variations (some had a back button, some had a sign-out button).
+
+**Fix:** Extracted `AppNav` into `common/components/AppNav.tsx` with three props — `onBack`, `userName`, and `showSignOut` — covering all variants. All pages now import and use `AppNav`.
+
+---
+
+### 10. Formatting utilities duplicated across components
+
+**Symptom:** `formatCurrency`, `formatDate`, and `formatLocation` were defined as local functions in `JobCard`, `BidList`, and `JobDetailPage` independently, with slightly inconsistent formatting options.
+
+**Root cause:** Each component was written in isolation with its own local helpers.
+
+**Fix:** Extracted all formatters into `common/hooks/useFormatters.ts` returning `{ formatCurrency, formatDate, formatDateTime, formatLocation }`. All components now call the hook instead of defining their own.
 
 ---
 

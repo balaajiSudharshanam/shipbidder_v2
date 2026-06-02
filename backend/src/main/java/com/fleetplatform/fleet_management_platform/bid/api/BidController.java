@@ -18,15 +18,17 @@ public class BidController {
 
     private final BidService bidService;
 
-    @PostMapping(ApiRoutes.Job.BY_ID_BIDS)
+    @PostMapping(ApiRoutes.Job.BIDS)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('BIDDER')")
-    public BidResponse placeBid(
-            @PathVariable Long id,
-            @RequestBody BidRequest req,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        return bidService.placeBid(id, userDetails.getUsername(), req);
+    public BidResponse placeBid(@RequestBody BidRequest req) {
+        return bidService.placeBid(req);
+    }
+
+    @GetMapping(ApiRoutes.Job.BIDS_MY)
+    @PreAuthorize("hasRole('BIDDER')")
+    public List<BidResponse> getMyBids(@AuthenticationPrincipal UserDetails userDetails) {
+        return bidService.getMyBids(userDetails.getUsername());
     }
 
     @GetMapping(ApiRoutes.Job.BY_ID_BIDS)

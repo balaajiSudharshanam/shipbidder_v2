@@ -51,6 +51,7 @@ export type BidStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED'
 
 export interface BidResponse {
   id: number
+  jobId: number
   bidderId: number
   bidderName: string
   bidderEmail: string

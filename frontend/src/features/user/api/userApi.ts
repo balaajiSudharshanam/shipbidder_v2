@@ -3,6 +3,7 @@ import { ApiRoutes } from '../../../common/apiRoutes'
 export type Role = 'JOB_POSTER' | 'BIDDER' | 'UNASSIGNED'
 
 export interface UserProfile {
+  id: number
   email: string
   name: string
   role: Role

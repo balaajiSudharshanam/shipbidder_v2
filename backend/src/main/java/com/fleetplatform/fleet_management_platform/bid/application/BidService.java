@@ -31,12 +31,15 @@ public class BidService {
     private final UserRepository userRepository;
 
     @Transactional
-    public BidResponse placeBid(Long jobId, String bidderEmail, BidRequest req) {
+    public BidResponse placeBid(BidRequest req) {
+        if (req.getUserId() == null || req.getJobId() == null) {
+            throw new BadRequestException("userId and jobId are required");
+        }
         if (req.getAmount() == null || req.getAmount().signum() <= 0) {
             throw new BadRequestException("Bid amount must be positive");
         }
 
-        Job job = jobRepository.findById(jobId)
+        Job job = jobRepository.findById(req.getJobId())
                 .orElseThrow(() -> new NotFoundException("Job not found"));
 
         if (job.getStatus() != JobStatus.OPEN) {
@@ -51,14 +54,14 @@ public class BidService {
             throw new BadRequestException("Bid exceeds the budget ceiling");
         }
 
-        if (job.getPoster().getEmail().equals(bidderEmail)) {
+        if (job.getPoster().getId().equals(req.getUserId())) {
             throw new BadRequestException("Job posters cannot bid on their own jobs");
         }
 
-        User bidder = userRepository.findByEmail(bidderEmail)
-                .orElseThrow(() -> new UnauthorizedException("User not found"));
+        User bidder = userRepository.findById(req.getUserId())
+                .orElseThrow(() -> new NotFoundException("Bidder not found"));
 
-        if (bidRepository.findByJobIdAndBidderEmail(jobId, bidderEmail).isPresent()) {
+        if (bidRepository.findByJobIdAndBidderId(req.getJobId(), req.getUserId()).isPresent()) {
             throw new ConflictException("You have already placed a bid on this job");
         }
 
@@ -71,6 +74,14 @@ public class BidService {
                 .build();
 
         return BidMapper.toResponse(bidRepository.save(bid));
+    }
+
+    @Transactional(readOnly = true)
+    public List<BidResponse> getMyBids(String bidderEmail) {
+        return bidRepository.findByBidderEmailOrderByCreatedAtDesc(bidderEmail)
+                .stream()
+                .map(BidMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
