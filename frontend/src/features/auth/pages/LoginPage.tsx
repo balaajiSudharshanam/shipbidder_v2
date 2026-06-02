@@ -3,24 +3,31 @@ import { Link, useNavigate } from 'react-router-dom'
 import type { FormEvent } from 'react'
 import type { LoginResponse } from '../api/authApi'
 import { AppRoutes } from '../../../common/appRoutes'
+import { useToast } from '../../../common/context/ToastContext'
+import { useUser } from '../../user/context/UserContext'
 import { login } from '../api/authApi'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { refreshUser } = useUser()
+  const { showError } = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    setError('')
     setLoading(true)
     try {
       const res: LoginResponse = await login(email, password)
-      navigate(res.status === 'ONBOARDING_REQUIRED' ? AppRoutes.SELECT_ROLE : AppRoutes.DASHBOARD)
+      if (res.status === 'ONBOARDING_REQUIRED') {
+        navigate(AppRoutes.SELECT_ROLE)
+      } else {
+        await refreshUser()
+        navigate(AppRoutes.DASHBOARD)
+      }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      showError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setLoading(false)
     }
@@ -35,8 +42,6 @@ export default function LoginPage() {
         <p style={{ color: 'rgba(243,243,243,0.5)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
           Sign in to your account
         </p>
-
-        {error && <div className="alert-fleet">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>

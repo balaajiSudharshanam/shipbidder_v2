@@ -1,4 +1,4 @@
-package com.fleetplatform.fleet_management_platform.job.api;
+package com.fleetplatform.fleet_management_platform.location.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class LocationResponse {
-    private String address;
-    private String city;
+    private Long id;
     private Double lat;
     private Double lng;
+    private String address;
 }

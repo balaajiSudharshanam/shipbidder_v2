@@ -1,6 +1,8 @@
 package com.fleetplatform.fleet_management_platform.job.api;
 
 import com.fleetplatform.fleet_management_platform.job.domain.JobStatus;
+import com.fleetplatform.fleet_management_platform.location.api.LocationResponse;
+import com.fleetplatform.fleet_management_platform.shipment.api.ShipmentResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

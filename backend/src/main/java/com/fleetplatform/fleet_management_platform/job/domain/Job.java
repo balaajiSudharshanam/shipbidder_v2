@@ -1,5 +1,7 @@
 package com.fleetplatform.fleet_management_platform.job.domain;
 
+import com.fleetplatform.fleet_management_platform.location.domain.Location;
+import com.fleetplatform.fleet_management_platform.shipment.domain.Shipment;
 import com.fleetplatform.fleet_management_platform.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,22 +36,12 @@ public class Job {
     @Column(nullable = false)
     private LocalDateTime auctionClosesAt;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "address", column = @Column(name = "pickup_address", nullable = false)),
-            @AttributeOverride(name = "city",    column = @Column(name = "pickup_city",    nullable = false)),
-            @AttributeOverride(name = "lat",     column = @Column(name = "pickup_lat",     nullable = false)),
-            @AttributeOverride(name = "lng",     column = @Column(name = "pickup_lng",     nullable = false))
-    })
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pickup_location_id", nullable = false)
     private Location pickup;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "address", column = @Column(name = "dropoff_address", nullable = false)),
-            @AttributeOverride(name = "city",    column = @Column(name = "dropoff_city",    nullable = false)),
-            @AttributeOverride(name = "lat",     column = @Column(name = "dropoff_lat",     nullable = false)),
-            @AttributeOverride(name = "lng",     column = @Column(name = "dropoff_lng",     nullable = false))
-    })
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dropoff_location_id", nullable = false)
     private Location dropoff;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

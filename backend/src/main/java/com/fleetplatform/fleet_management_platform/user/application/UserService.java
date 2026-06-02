@@ -25,7 +25,7 @@ public class UserService {
         return UserMapper.toResponse(user);
     }
 
-    public UserRole updateRole(String onboardingToken, String role) {
+    public User updateRole(String onboardingToken, String role) {
         if (onboardingToken == null || onboardingToken.isBlank()) {
             throw new UnauthorizedException("Missing onboarding token");
         }
@@ -46,9 +46,7 @@ public class UserService {
         }
 
         user.setRole(newRole);
-        userRepository.save(user);
-
-        return newRole;
+        return userRepository.save(user);
     }
 
     private UserRole parseRole(String role) {

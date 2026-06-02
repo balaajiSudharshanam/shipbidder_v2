@@ -1,8 +1,9 @@
 package com.fleetplatform.fleet_management_platform.user.api;
 
+import com.fleetplatform.fleet_management_platform.auth.application.JwtService;
 import com.fleetplatform.fleet_management_platform.common.ApiRoutes;
 import com.fleetplatform.fleet_management_platform.user.application.UserService;
-import com.fleetplatform.fleet_management_platform.user.domain.UserRole;
+import com.fleetplatform.fleet_management_platform.user.domain.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.security.Principal;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
     @GetMapping(ApiRoutes.User.ME)
     public UserResponse getMe(Principal principal) {
@@ -28,14 +30,21 @@ public class UserController {
             @RequestBody UpdateRoleRequest request,
             HttpServletResponse response
     ) {
-        UserRole updatedRole = userService.updateRole(onboardingToken, request.getRole());
+        User user = userService.updateRole(onboardingToken, request.getRole());
 
-        Cookie clearCookie = new Cookie("onboarding_token", null);
-        clearCookie.setHttpOnly(true);
-        clearCookie.setPath("/");
-        clearCookie.setMaxAge(0);
-        response.addCookie(clearCookie);
+        Cookie clear = new Cookie("onboarding_token", "");
+        clear.setHttpOnly(true);
+        clear.setPath("/");
+        clear.setMaxAge(0);
+        response.addCookie(clear);
 
-        return new RoleResponse("Role updated successfully", updatedRole.name());
+        Cookie authCookie = new Cookie("auth_token", jwtService.generateToken(user));
+        authCookie.setHttpOnly(true);
+        authCookie.setSecure(false);
+        authCookie.setPath("/");
+        authCookie.setMaxAge(24 * 60 * 60);
+        response.addCookie(authCookie);
+
+        return new RoleResponse("Role updated successfully", user.getRole().name());
     }
 }

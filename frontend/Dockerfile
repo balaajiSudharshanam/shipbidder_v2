@@ -7,6 +7,8 @@ EXPOSE 5173
 CMD ["npm", "run", "dev"]
 
 FROM node:22-alpine AS build
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

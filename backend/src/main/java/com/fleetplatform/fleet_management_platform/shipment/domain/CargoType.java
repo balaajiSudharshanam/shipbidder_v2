@@ -1,4 +1,4 @@
-package com.fleetplatform.fleet_management_platform.job.domain;
+package com.fleetplatform.fleet_management_platform.shipment.domain;
 
 public enum CargoType {
     GENERAL, REFRIGERATED, HAZMAT, OVERSIZED

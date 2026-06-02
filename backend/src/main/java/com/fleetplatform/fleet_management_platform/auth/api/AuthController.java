@@ -25,6 +25,8 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request,
             HttpServletResponse response
     ) {
+        clearSessionCookies(response);
+
         String token = authService.register(request.getEmail(), request.getPassword(), request.getName());
 
         Cookie cookie = new Cookie("onboarding_token", token);
@@ -42,6 +44,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletResponse response
     ) {
+        clearSessionCookies(response);
         LoginResult result = authService.login(request.getEmail(), request.getPassword());
 
         Cookie cookie;
@@ -65,5 +68,16 @@ public class AuthController {
     @GetMapping(ApiRoutes.Auth.LOGIN_SUCCESS)
     public Map<String, String> loginSuccess() {
         return Map.of("message", "OAuth login success");
+    }
+
+    private void clearSessionCookies(HttpServletResponse response) {
+        for (String name : new String[]{"auth_token", "onboarding_token"}) {
+            Cookie expired = new Cookie(name, "");
+            expired.setHttpOnly(true);
+            expired.setSecure(false);
+            expired.setPath("/");
+            expired.setMaxAge(0);
+            response.addCookie(expired);
+        }
     }
 }

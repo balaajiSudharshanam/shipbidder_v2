@@ -1,12 +1,14 @@
 package com.fleetplatform.fleet_management_platform.job.api;
 
 import com.fleetplatform.fleet_management_platform.common.ApiRoutes;
+import com.fleetplatform.fleet_management_platform.common.exception.BadRequestException;
 import com.fleetplatform.fleet_management_platform.job.application.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -39,5 +41,18 @@ public class JobController {
     @GetMapping(ApiRoutes.Job.BY_ID)
     public JobResponse getJobById(@PathVariable Long id) {
         return jobService.getJobById(id);
+    }
+
+    @PostMapping(ApiRoutes.Job.BY_ID_IMAGES)
+    @PreAuthorize("hasRole('JOB_POSTER')")
+    public JobResponse uploadImages(
+            @PathVariable Long id,
+            @RequestParam("images") List<MultipartFile> images,
+            Principal principal
+    ) {
+        if (images.size() > 4) {
+            throw new BadRequestException("Maximum 4 images per shipment");
+        }
+        return jobService.attachImages(id, principal.getName(), images);
     }
 }

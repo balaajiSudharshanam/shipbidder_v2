@@ -20,6 +20,8 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fleetplatform.fleet_management_platform.common.ApiRoutes;
 import com.fleetplatform.fleet_management_platform.job.domain.JobRepository;
+import com.fleetplatform.fleet_management_platform.location.domain.Location;
+import com.fleetplatform.fleet_management_platform.location.domain.LocationRepository;
 import com.fleetplatform.fleet_management_platform.user.domain.User;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRepository;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRole;
@@ -40,10 +42,12 @@ class JobControllerTest {
     @Autowired private WebApplicationContext context;
     @Autowired private UserRepository userRepository;
     @Autowired private JobRepository jobRepository;
+    @Autowired private LocationRepository locationRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-
     private MockMvc mockMvc;
+    private Long pickupId;
+    private Long dropoffId;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +56,7 @@ class JobControllerTest {
             .apply(SecurityMockMvcConfigurers.springSecurity())
             .build();
         jobRepository.deleteAll();
+        locationRepository.deleteAll();
         userRepository.deleteAll();
         userRepository.save(User.builder()
             .email(POSTER_EMAIL)
@@ -60,27 +65,18 @@ class JobControllerTest {
             .role(UserRole.JOB_POSTER)
             .createdAt(LocalDateTime.now())
             .build());
+        pickupId = locationRepository.save(Location.builder().lat(13.0827).lng(80.2707).build()).getId();
+        dropoffId = locationRepository.save(Location.builder().lat(12.9716).lng(77.5946).build()).getId();
     }
 
     @AfterEach
     void tearDown() {
         jobRepository.deleteAll();
+        locationRepository.deleteAll();
         userRepository.deleteAll();
     }
 
     private Map<String, Object> validBody() {
-        Map<String, Object> pickup = Map.of(
-            "address", "123 Pickup St",
-            "city", "Chennai",
-            "lat", 13.0827,
-            "lng", 80.2707
-        );
-        Map<String, Object> dropoff = Map.of(
-            "address", "456 Dropoff Ave",
-            "city", "Bangalore",
-            "lat", 12.9716,
-            "lng", 77.5946
-        );
         Map<String, Object> shipment = Map.of(
             "weightKg", 100.0,
             "cargoType", "GENERAL",
@@ -88,21 +84,12 @@ class JobControllerTest {
             "stackable", true
         );
         Map<String, Object> body = new HashMap<>();
-        body.put("pickup", pickup);
-        body.put("dropoff", dropoff);
+        body.put("pickupId", pickupId);
+        body.put("dropoffId", dropoffId);
         body.put("budgetCeiling", 1000.00);
         body.put("auctionClosesAt", "2027-06-01T10:00:00");
         body.put("shipment", shipment);
         return body;
-    }
-
-    private Map<String, Object> locationMap(String address, String city, Double lat, Double lng) {
-        Map<String, Object> loc = new HashMap<>();
-        loc.put("address", address);
-        loc.put("city", city);
-        loc.put("lat", lat);
-        loc.put("lng", lng);
-        return loc;
     }
 
     private Map<String, Object> shipmentMap(Double weightKg, String cargoType) {
@@ -129,11 +116,10 @@ class JobControllerTest {
             .andExpect(jsonPath("$.posterEmail").value(POSTER_EMAIL))
             .andExpect(jsonPath("$.status").value("OPEN"))
             .andExpect(jsonPath("$.budgetCeiling").value(1000.0))
-            .andExpect(jsonPath("$.pickup.address").value("123 Pickup St"))
-            .andExpect(jsonPath("$.pickup.city").value("Chennai"))
             .andExpect(jsonPath("$.pickup.lat").value(13.0827))
-            .andExpect(jsonPath("$.dropoff.address").value("456 Dropoff Ave"))
-            .andExpect(jsonPath("$.dropoff.city").value("Bangalore"))
+            .andExpect(jsonPath("$.pickup.lng").value(80.2707))
+            .andExpect(jsonPath("$.dropoff.lat").value(12.9716))
+            .andExpect(jsonPath("$.dropoff.lng").value(77.5946))
             .andExpect(jsonPath("$.shipment.weightKg").value(100.0))
             .andExpect(jsonPath("$.shipment.cargoType").value("GENERAL"))
             .andExpect(jsonPath("$.shipment.fragile").value(false));
@@ -158,92 +144,52 @@ class JobControllerTest {
             .andExpect(status().isForbidden());
     }
 
-    // ===== POST /api/jobs — pickup location validation =====
+    // ===== POST /api/jobs — location validation =====
 
     @Test
     @WithMockUser(username = POSTER_EMAIL, roles = "JOB_POSTER")
-    void createJob_nullPickup_returns400() throws Exception {
+    void createJob_nullPickupId_returns400() throws Exception {
         Map<String, Object> body = validBody();
-        body.put("pickup", null);
+        body.put("pickupId", null);
         mockMvc.perform(post(JOBS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(body)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors.pickup").exists());
+            .andExpect(jsonPath("$.errors.pickupId").exists());
     }
 
     @Test
     @WithMockUser(username = POSTER_EMAIL, roles = "JOB_POSTER")
-    void createJob_blankPickupAddress_returns400() throws Exception {
+    void createJob_nullDropoffId_returns400() throws Exception {
         Map<String, Object> body = validBody();
-        body.put("pickup", locationMap("", "Chennai", 13.08, 80.27));
+        body.put("dropoffId", null);
         mockMvc.perform(post(JOBS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(body)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors['pickup.address']").exists());
+            .andExpect(jsonPath("$.errors.dropoffId").exists());
     }
 
     @Test
     @WithMockUser(username = POSTER_EMAIL, roles = "JOB_POSTER")
-    void createJob_whitespacePickupCity_returns400() throws Exception {
+    void createJob_nonExistentPickupId_returns404() throws Exception {
         Map<String, Object> body = validBody();
-        body.put("pickup", locationMap("123 Pickup St", "   ", 13.08, 80.27));
+        body.put("pickupId", 999999L);
         mockMvc.perform(post(JOBS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(body)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors['pickup.city']").exists());
+            .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(username = POSTER_EMAIL, roles = "JOB_POSTER")
-    void createJob_nullPickupLat_returns400() throws Exception {
+    void createJob_nonExistentDropoffId_returns404() throws Exception {
         Map<String, Object> body = validBody();
-        body.put("pickup", locationMap("123 Pickup St", "Chennai", null, 80.27));
+        body.put("dropoffId", 999999L);
         mockMvc.perform(post(JOBS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(body)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors['pickup.lat']").exists());
-    }
-
-    @Test
-    @WithMockUser(username = POSTER_EMAIL, roles = "JOB_POSTER")
-    void createJob_nullPickupLng_returns400() throws Exception {
-        Map<String, Object> body = validBody();
-        body.put("pickup", locationMap("123 Pickup St", "Chennai", 13.08, null));
-        mockMvc.perform(post(JOBS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(body)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors['pickup.lng']").exists());
-    }
-
-    // ===== POST /api/jobs — dropoff location validation =====
-
-    @Test
-    @WithMockUser(username = POSTER_EMAIL, roles = "JOB_POSTER")
-    void createJob_nullDropoff_returns400() throws Exception {
-        Map<String, Object> body = validBody();
-        body.put("dropoff", null);
-        mockMvc.perform(post(JOBS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(body)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors.dropoff").exists());
-    }
-
-    @Test
-    @WithMockUser(username = POSTER_EMAIL, roles = "JOB_POSTER")
-    void createJob_blankDropoffAddress_returns400() throws Exception {
-        Map<String, Object> body = validBody();
-        body.put("dropoff", locationMap("", "Bangalore", 12.97, 77.59));
-        mockMvc.perform(post(JOBS_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(body)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors['dropoff.address']").exists());
+            .andExpect(status().isNotFound());
     }
 
     // ===== POST /api/jobs — budget validation =====
@@ -377,13 +323,13 @@ class JobControllerTest {
     void createJob_invalidCargoType_returns400() throws Exception {
         String rawJson = """
             {
-              "pickup":  {"address":"123 Pickup St","city":"Chennai","lat":13.08,"lng":80.27},
-              "dropoff": {"address":"456 Dropoff Ave","city":"Bangalore","lat":12.97,"lng":77.59},
+              "pickupId": %d,
+              "dropoffId": %d,
               "budgetCeiling": 1000.00,
               "auctionClosesAt": "2027-06-01T10:00:00",
               "shipment": {"weightKg":100.0,"cargoType":"INVALID_CARGO"}
             }
-            """;
+            """.formatted(pickupId, dropoffId);
         mockMvc.perform(post(JOBS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(rawJson))
@@ -437,8 +383,8 @@ class JobControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].status").value("OPEN"))
-            .andExpect(jsonPath("$[0].pickup.address").value("123 Pickup St"))
-            .andExpect(jsonPath("$[0].dropoff.address").value("456 Dropoff Ave"))
+            .andExpect(jsonPath("$[0].pickup.lat").value(13.0827))
+            .andExpect(jsonPath("$[0].dropoff.lat").value(12.9716))
             .andExpect(jsonPath("$[0].shipment.cargoType").value("GENERAL"));
     }
 

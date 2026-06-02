@@ -13,5 +13,10 @@ export const ApiRoutes = {
     BASE: '/api/jobs',
     BY_ID: (id: number) => `/${id}`,
     MY: '/my',
+    IMAGES: (id: number) => `/${id}/images`,
+    BIDS: (id: number) => `/${id}/bids`,
+  },
+  Location: {
+    BASE: '/api/locations',
   },
 } as const

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import type { Role } from '../../user/api/userApi'
 
 import { AppRoutes } from '../../../common/appRoutes'
+import { useToast } from '../../../common/context/ToastContext'
 import { useUser } from '../context/UserContext'
 import { updateRole } from '../../user/api/userApi'
 
@@ -32,20 +33,19 @@ const ROLES: RoleCard[] = [
 export default function SelectRolePage() {
   const navigate = useNavigate()
   const { refreshUser } = useUser()
+  const { showError } = useToast()
   const [selected, setSelected] = useState<Role | null>(null)
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleConfirm() {
     if (!selected) return
-    setError('')
     setLoading(true)
     try {
       await updateRole(selected)
       await refreshUser()
       navigate(AppRoutes.DASHBOARD)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to set role')
+      showError(err instanceof Error ? err.message : 'Failed to set role')
     } finally {
       setLoading(false)
     }
@@ -62,8 +62,6 @@ export default function SelectRolePage() {
             Choose your role — you can only select this once.
           </p>
         </div>
-
-        {error && <div className="alert-fleet" style={{ textAlign: 'center' }}>{error}</div>}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
           {ROLES.map(({ role, title, subtitle, description }) => (

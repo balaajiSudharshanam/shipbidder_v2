@@ -2,6 +2,8 @@ services:
   frontend:
     build:
       target: dev
+    environment:
+      VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
     volumes:
       - ./frontend:/app
       - /app/node_modules

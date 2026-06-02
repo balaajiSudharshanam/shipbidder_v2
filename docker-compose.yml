@@ -32,12 +32,18 @@ services:
       ONBOARDING_JWT_SECRET: ${ONBOARDING_JWT_SECRET}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       target: prod
+      args:
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
     container_name: fleet-frontend
     depends_on:
       - backend

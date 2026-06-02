@@ -148,3 +148,26 @@ a:hover {
   font-weight: 600;
   margin-bottom: 0.35rem;
 }
+
+/* ── Toasts ── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.toast-fleet {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(28, 27, 27, 0.96);
+  border-left: 3px solid #e05252;
+  color: var(--c-light);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  min-width: 280px;
+  max-width: 440px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
+  animation: toast-in 0.2s ease-out;
+}

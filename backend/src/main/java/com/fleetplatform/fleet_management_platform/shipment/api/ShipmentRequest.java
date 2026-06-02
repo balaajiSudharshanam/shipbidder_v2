@@ -1,6 +1,6 @@
-package com.fleetplatform.fleet_management_platform.job.api;
+package com.fleetplatform.fleet_management_platform.shipment.api;
 
-import com.fleetplatform.fleet_management_platform.job.domain.CargoType;
+import com.fleetplatform.fleet_management_platform.shipment.domain.CargoType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

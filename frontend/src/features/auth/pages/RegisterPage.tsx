@@ -2,25 +2,25 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import type { FormEvent } from 'react'
 import { AppRoutes } from '../../../common/appRoutes'
+import { useToast } from '../../../common/context/ToastContext'
 import { register } from '../api/authApi'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { showError } = useToast()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    setError('')
     setLoading(true)
     try {
       await register(name, email, password)
       navigate(AppRoutes.SELECT_ROLE)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Registration failed')
+      showError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
       setLoading(false)
     }
@@ -35,8 +35,6 @@ export default function RegisterPage() {
         <p style={{ color: 'rgba(243,243,243,0.5)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
           Get started with ShipBidder
         </p>
-
-        {error && <div className="alert-fleet">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>

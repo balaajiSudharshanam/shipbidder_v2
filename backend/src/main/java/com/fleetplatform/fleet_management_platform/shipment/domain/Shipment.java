@@ -1,7 +1,10 @@
-package com.fleetplatform.fleet_management_platform.job.domain;
+package com.fleetplatform.fleet_management_platform.shipment.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "shipments")
@@ -32,4 +35,10 @@ public class Shipment {
 
     @Column(columnDefinition = "TEXT")
     private String specialInstructions;
+
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "shipment_images", joinColumns = @JoinColumn(name = "shipment_id"))
+    @Column(name = "url", length = 1000)
+    private List<String> imageUrls = new ArrayList<>();
 }

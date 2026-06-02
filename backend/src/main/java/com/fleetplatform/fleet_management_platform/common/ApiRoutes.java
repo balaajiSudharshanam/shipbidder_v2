@@ -19,5 +19,16 @@ public class ApiRoutes {
         public static final String BASE = "/api/jobs";
         public static final String BY_ID = "/{id}";
         public static final String MY = "/my";
+        public static final String BY_ID_IMAGES = "/{id}/images";
+        public static final String BY_ID_BIDS = "/{id}/bids";
+    }
+
+    public static class Location {
+        public static final String BASE = "/api/locations";
+    }
+
+    public static class Shipment {
+        public static final String BASE = "/api/shipments";
+        public static final String BY_ID = "/{id}";
     }
 }

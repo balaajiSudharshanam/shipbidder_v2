@@ -2,7 +2,6 @@ spring:
   application:
     name: fleet-management-platform
 
-
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -29,13 +28,26 @@ spring:
               - profile
               - email
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 40MB
+
 server:
   port: ${SERVER_PORT:8080}
+
 app:
   frontend:
     url: ${FRONTEND_URL:http://localhost}
+  google:
+    maps:
+      api-key: ${GOOGLE_MAPS_API_KEY:}
   jwt:
     onboarding-secret: ${ONBOARDING_JWT_SECRET}
     onboarding-expiration-ms: 600000
     auth-secret: ${AUTH_JWT_SECRET}
     auth-expiration-ms: 86400000
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME}
+    api-key: ${CLOUDINARY_API_KEY}
+    api-secret: ${CLOUDINARY_API_SECRET}

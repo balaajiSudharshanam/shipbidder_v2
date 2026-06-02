@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface JobRepository extends JpaRepository<Job, Long> {
 
-    @Query("SELECT j FROM Job j JOIN FETCH j.poster JOIN FETCH j.shipment WHERE j.status = :status")
+    @Query("SELECT j FROM Job j JOIN FETCH j.poster JOIN FETCH j.pickup JOIN FETCH j.dropoff JOIN FETCH j.shipment WHERE j.status = :status")
     List<Job> findOpenJobs(JobStatus status);
 
-    @Query("SELECT j FROM Job j JOIN FETCH j.poster JOIN FETCH j.shipment WHERE j.poster.email = :email")
+    @Query("SELECT j FROM Job j JOIN FETCH j.poster JOIN FETCH j.pickup JOIN FETCH j.dropoff JOIN FETCH j.shipment WHERE j.poster.email = :email")
     List<Job> findByPosterEmail(String email);
 }

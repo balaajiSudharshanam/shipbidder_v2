@@ -4,13 +4,20 @@ import com.fleetplatform.fleet_management_platform.common.exception.NotFoundExce
 import com.fleetplatform.fleet_management_platform.common.exception.UnauthorizedException;
 import com.fleetplatform.fleet_management_platform.job.api.CreateJobRequest;
 import com.fleetplatform.fleet_management_platform.job.api.JobResponse;
-import com.fleetplatform.fleet_management_platform.job.domain.*;
+import com.fleetplatform.fleet_management_platform.job.domain.Job;
+import com.fleetplatform.fleet_management_platform.job.domain.JobRepository;
+import com.fleetplatform.fleet_management_platform.job.domain.JobStatus;
 import com.fleetplatform.fleet_management_platform.job.mapper.JobMapper;
+import com.fleetplatform.fleet_management_platform.location.domain.Location;
+import com.fleetplatform.fleet_management_platform.location.domain.LocationRepository;
+import com.fleetplatform.fleet_management_platform.shipment.domain.Shipment;
+import com.fleetplatform.fleet_management_platform.upload.application.UploadService;
 import com.fleetplatform.fleet_management_platform.user.domain.User;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,11 +28,18 @@ public class JobService {
 
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
+    private final UploadService uploadService;
 
     @Transactional
     public JobResponse createJob(String posterEmail, CreateJobRequest req) {
         User poster = userRepository.findByEmail(posterEmail)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
+
+        Location pickup = locationRepository.findById(req.getPickupId())
+                .orElseThrow(() -> new NotFoundException("Pickup location not found"));
+        Location dropoff = locationRepository.findById(req.getDropoffId())
+                .orElseThrow(() -> new NotFoundException("Dropoff location not found"));
 
         Shipment shipment = Shipment.builder()
                 .weightKg(req.getShipment().getWeightKg())
@@ -43,18 +57,8 @@ public class JobService {
                 .status(JobStatus.OPEN)
                 .budgetCeiling(req.getBudgetCeiling())
                 .auctionClosesAt(req.getAuctionClosesAt())
-                .pickup(new Location(
-                        req.getPickup().getAddress(),
-                        req.getPickup().getCity(),
-                        req.getPickup().getLat(),
-                        req.getPickup().getLng()
-                ))
-                .dropoff(new Location(
-                        req.getDropoff().getAddress(),
-                        req.getDropoff().getCity(),
-                        req.getDropoff().getLat(),
-                        req.getDropoff().getLng()
-                ))
+                .pickup(pickup)
+                .dropoff(dropoff)
                 .shipment(shipment)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -83,5 +87,20 @@ public class JobService {
         Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Job not found"));
         return JobMapper.toResponse(job);
+    }
+
+    @Transactional
+    public JobResponse attachImages(Long jobId, String posterEmail, List<MultipartFile> files) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new NotFoundException("Job not found"));
+
+        if (!job.getPoster().getEmail().equals(posterEmail)) {
+            throw new UnauthorizedException("Not authorised to modify this job");
+        }
+
+        List<String> urls = uploadService.uploadImages(files);
+        job.getShipment().getImageUrls().addAll(urls);
+
+        return JobMapper.toResponse(jobRepository.save(job));
     }
 }

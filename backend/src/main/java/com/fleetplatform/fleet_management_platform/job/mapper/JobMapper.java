@@ -1,11 +1,9 @@
 package com.fleetplatform.fleet_management_platform.job.mapper;
 
 import com.fleetplatform.fleet_management_platform.job.api.JobResponse;
-import com.fleetplatform.fleet_management_platform.job.api.LocationResponse;
-import com.fleetplatform.fleet_management_platform.job.api.ShipmentResponse;
 import com.fleetplatform.fleet_management_platform.job.domain.Job;
-import com.fleetplatform.fleet_management_platform.job.domain.Location;
-import com.fleetplatform.fleet_management_platform.job.domain.Shipment;
+import com.fleetplatform.fleet_management_platform.location.mapper.LocationMapper;
+import com.fleetplatform.fleet_management_platform.shipment.mapper.ShipmentMapper;
 
 public class JobMapper {
 
@@ -19,28 +17,10 @@ public class JobMapper {
                 job.getStatus(),
                 job.getBudgetCeiling(),
                 job.getAuctionClosesAt(),
-                toLocationResponse(job.getPickup()),
-                toLocationResponse(job.getDropoff()),
-                toShipmentResponse(job.getShipment()),
+                LocationMapper.toResponse(job.getPickup()),
+                LocationMapper.toResponse(job.getDropoff()),
+                ShipmentMapper.toResponse(job.getShipment()),
                 job.getCreatedAt()
-        );
-    }
-
-    private static LocationResponse toLocationResponse(Location loc) {
-        return new LocationResponse(loc.getAddress(), loc.getCity(), loc.getLat(), loc.getLng());
-    }
-
-    private static ShipmentResponse toShipmentResponse(Shipment s) {
-        return new ShipmentResponse(
-                s.getId(),
-                s.getWeightKg(),
-                s.getLengthCm(),
-                s.getWidthCm(),
-                s.getHeightCm(),
-                s.getCargoType(),
-                s.getFragile(),
-                s.getStackable(),
-                s.getSpecialInstructions()
         );
     }
 }

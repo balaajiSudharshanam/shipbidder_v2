@@ -1,5 +1,6 @@
 package com.fleetplatform.fleet_management_platform.job.api;
 
+import com.fleetplatform.fleet_management_platform.shipment.api.ShipmentRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Future;
@@ -12,13 +13,11 @@ import java.time.LocalDateTime;
 @Getter
 public class CreateJobRequest {
 
-    @Valid
     @NotNull
-    private LocationRequest pickup;
+    private Long pickupId;
 
-    @Valid
     @NotNull
-    private LocationRequest dropoff;
+    private Long dropoffId;
 
     @NotNull
     @DecimalMin("0.01")
