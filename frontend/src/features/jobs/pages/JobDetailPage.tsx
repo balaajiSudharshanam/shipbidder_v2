@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { AppRoutes } from '../../../common/appRoutes'
 import { useFormatters } from '../../../common/hooks/useFormatters'
 import { useToast } from '../../../common/context/ToastContext'
 import { useUser } from '../../user/context/UserContext'
@@ -224,7 +223,6 @@ export default function JobDetailPage() {
                   budgetCeiling={job.budgetCeiling}
                   jobStatus={job.status}
                   auctionClosesAt={job.auctionClosesAt}
-                  onBidPlaced={() => navigate(AppRoutes.JOBS)}
                 />
               </div>
             )}

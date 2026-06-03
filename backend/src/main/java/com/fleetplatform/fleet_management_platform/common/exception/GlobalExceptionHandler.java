@@ -80,9 +80,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ProblemDetail> handleDataIntegrity(DataIntegrityViolationException ex) {
-        log.error("Data integrity violation", ex);
+        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        String detail = message.contains("email")
+                ? "An account with this email already exists"
+                : "A duplicate entry already exists";
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "Database constraint violation — reset the database schema to resolve."));
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detail));
     }
 
     @ExceptionHandler(Exception.class)

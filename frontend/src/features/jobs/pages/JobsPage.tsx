@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppRoutes } from '../../../common/appRoutes'
+import { useUser } from '../../user/context/UserContext'
 import AppNav from '../../../common/components/AppNav'
 import { getOpenJobs } from '../api/jobsApi'
+import { getMyBids } from '../api/bidsApi'
 import JobCard from '../components/JobCard'
-import type { JobResponse } from '../types'
+import type { JobResponse, BidResponse } from '../types'
 
 export default function JobsPage() {
   const navigate = useNavigate()
+  const { user } = useUser()
   const [jobs, setJobs] = useState<JobResponse[]>([])
+  const [bids, setBids] = useState<BidResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -18,6 +22,14 @@ export default function JobsPage() {
       .catch(() => setError('Failed to load jobs. Please try again.'))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (user?.role === 'BIDDER') {
+      getMyBids().then(setBids).catch(() => undefined)
+    }
+  }, [user])
+
+  const biddedJobIds = new Set(bids.map(b => b.jobId))
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--c-light)' }}>
@@ -74,7 +86,7 @@ export default function JobsPage() {
             gap: '1rem',
           }}>
             {jobs.map(job => (
-              <JobCard key={job.id} job={job} variant="carrier" onClick={() => navigate(AppRoutes.jobDetail(job.id))} />
+              <JobCard key={job.id} job={job} variant="carrier" hasPlacedBid={biddedJobIds.has(job.id)} onClick={() => navigate(AppRoutes.jobDetail(job.id))} />
             ))}
           </div>
         )}

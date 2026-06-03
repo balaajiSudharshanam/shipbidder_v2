@@ -48,6 +48,7 @@ export default function CarrierDashboard({ user }: Props) {
   const activeBids = bids.filter(b => b.status === 'PENDING').length
   const wonBids    = bids.filter(b => b.status === 'ACCEPTED').length
 
+  const biddedJobIds = new Set(bids.map(b => b.jobId))
   const preview = jobs.slice(0, PREVIEW_COUNT)
 
   return (
@@ -132,7 +133,7 @@ export default function CarrierDashboard({ user }: Props) {
               gap: '1rem',
             }}>
               {preview.map(job => (
-                <JobCard key={job.id} job={job} variant="carrier" onClick={() => navigate(AppRoutes.jobDetail(job.id))} />
+                <JobCard key={job.id} job={job} variant="carrier" hasPlacedBid={biddedJobIds.has(job.id)} onClick={() => navigate(AppRoutes.jobDetail(job.id))} />
               ))}
             </div>
           )}

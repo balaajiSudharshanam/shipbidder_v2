@@ -4,6 +4,7 @@ import type { JobResponse } from '../types'
 interface Props {
   job: JobResponse
   variant: 'poster' | 'carrier'
+  hasPlacedBid?: boolean
   onClick?: () => void
 }
 
@@ -23,7 +24,7 @@ const badgeBase: React.CSSProperties = {
   borderRadius: 4,
 }
 
-export default function JobCard({ job, variant, onClick }: Props) {
+export default function JobCard({ job, variant, hasPlacedBid = false, onClick }: Props) {
   const { formatCurrency, formatDate, formatLocation } = useFormatters()
   const statusStyle = STATUS_STYLE[job.status] ?? STATUS_STYLE.OPEN
   const dims =
@@ -75,10 +76,11 @@ export default function JobCard({ job, variant, onClick }: Props) {
         {variant === 'carrier' && job.status === 'OPEN' && (
           <button
             className="btn-fleet"
+            disabled={hasPlacedBid}
             onClick={e => { e.stopPropagation(); onClick?.() }}
-            style={{ width: 'auto', padding: '0.35rem 0.9rem', fontSize: '0.8rem' }}
+            style={{ width: 'auto', padding: '0.35rem 0.9rem', fontSize: '0.8rem', opacity: hasPlacedBid ? 0.45 : 1, cursor: hasPlacedBid ? 'default' : 'pointer' }}
           >
-            Place Bid
+            {hasPlacedBid ? 'Bid Placed' : 'Place Bid'}
           </button>
         )}
       </div>
