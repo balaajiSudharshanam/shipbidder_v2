@@ -5,10 +5,12 @@ import type { ReactNode } from 'react'
 interface Toast {
   id: number
   message: string
+  variant: 'error' | 'success'
 }
 
 interface ToastContextValue {
   showError: (message: string) => void
+  showSuccess: (message: string) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -18,7 +20,7 @@ const DURATION_MS = 4000
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   return (
-    <div className="toast-fleet">
+    <div className="toast-fleet" style={toast.variant === 'success' ? { backgroundColor: 'var(--c-mid)' } : undefined}>
       <span style={{ flex: 1 }}>{toast.message}</span>
       <button
         onClick={onDismiss}
@@ -49,12 +51,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const showError = useCallback((message: string) => {
     const id = ++nextId
-    setToasts(prev => [...prev, { id, message }])
+    setToasts(prev => [...prev, { id, message, variant: 'error' }])
+    setTimeout(() => dismiss(id), DURATION_MS)
+  }, [dismiss])
+
+  const showSuccess = useCallback((message: string) => {
+    const id = ++nextId
+    setToasts(prev => [...prev, { id, message, variant: 'success' }])
     setTimeout(() => dismiss(id), DURATION_MS)
   }, [dismiss])
 
   return (
-    <ToastContext.Provider value={{ showError }}>
+    <ToastContext.Provider value={{ showError, showSuccess }}>
       {children}
       {createPortal(
         <div style={{

@@ -44,3 +44,16 @@ export async function uploadJobImages(jobId: number, files: File[]): Promise<Job
   if (!res.ok) throw new Error('Failed to upload images')
   return res.json() as Promise<JobResponse>
 }
+
+export async function awardBid(jobId: number, bidId: number): Promise<void> {
+  const res = await fetch(`${ApiRoutes.Job.BASE}${ApiRoutes.Job.BY_ID_AWARD(jobId)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ bidId }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { detail?: string }
+    throw new Error(err.detail ?? 'Failed to award bid')
+  }
+}

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { AppRoutes } from '../appRoutes'
 
 interface Props {
@@ -5,9 +6,10 @@ interface Props {
   backLabel?: string
   userName?: string
   showSignOut?: boolean
+  notificationsSlot?: ReactNode
 }
 
-export default function AppNav({ onBack, backLabel = '← Back', userName, showSignOut }: Props) {
+export default function AppNav({ onBack, backLabel = '← Back', userName, showSignOut, notificationsSlot }: Props) {
   function handleSignOut() {
     document.cookie = 'auth_token=; Max-Age=0; path=/'
     window.location.href = AppRoutes.LOGIN
@@ -43,30 +45,29 @@ export default function AppNav({ onBack, backLabel = '← Back', userName, showS
         </span>
       </div>
 
-      {(userName || showSignOut) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          {userName && (
-            <span style={{ color: 'rgba(243,243,243,0.6)', fontSize: '0.875rem' }}>{userName}</span>
-          )}
-          {showSignOut && (
-            <button
-              onClick={handleSignOut}
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(243,243,243,0.25)',
-                color: 'var(--c-light)',
-                borderRadius: 6,
-                padding: '0.35rem 0.9rem',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-              }}
-            >
-              Sign out
-            </button>
-          )}
-        </div>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+        {notificationsSlot}
+        {userName && (
+          <span style={{ color: 'rgba(243,243,243,0.6)', fontSize: '0.875rem' }}>{userName}</span>
+        )}
+        {showSignOut && (
+          <button
+            onClick={handleSignOut}
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(243,243,243,0.25)',
+              color: 'var(--c-light)',
+              borderRadius: 6,
+              padding: '0.35rem 0.9rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+            }}
+          >
+            Sign out
+          </button>
+        )}
+      </div>
     </nav>
   )
 }

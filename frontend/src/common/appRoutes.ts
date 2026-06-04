@@ -6,4 +6,5 @@ export const AppRoutes = {
   JOBS: '/jobs',
   JOB_DETAIL: '/jobs/:id',
   jobDetail: (id: number) => `/jobs/${id}`,
+  NOTIFICATIONS: '/notifications',
 } as const

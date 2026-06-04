@@ -39,4 +39,14 @@ public class BidController {
     ) {
         return bidService.getBidsForJob(id, userDetails.getUsername());
     }
+
+    @PostMapping(ApiRoutes.Job.BY_ID_AWARD)
+    @PreAuthorize("hasRole('JOB_POSTER')")
+    public BidResponse awardBid(
+            @PathVariable Long id,
+            @RequestBody AwardRequest req,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return bidService.awardBid(id, req.getBidId(), userDetails.getUsername());
+    }
 }

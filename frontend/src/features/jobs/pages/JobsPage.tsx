@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AppRoutes } from '../../../common/appRoutes'
 import { useUser } from '../../user/context/UserContext'
 import AppNav from '../../../common/components/AppNav'
+import NotificationDropdown from '../../notifications/components/NotificationDropdown'
 import { getOpenJobs } from '../api/jobsApi'
 import { getMyBids } from '../api/bidsApi'
 import JobCard from '../components/JobCard'
@@ -33,7 +34,7 @@ export default function JobsPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--c-light)' }}>
-      <AppNav onBack={() => navigate(AppRoutes.DASHBOARD)} backLabel="← Dashboard" />
+      <AppNav onBack={() => navigate(AppRoutes.DASHBOARD)} backLabel="← Dashboard" notificationsSlot={<NotificationDropdown />} />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
         <div style={{ marginBottom: '2rem' }}>

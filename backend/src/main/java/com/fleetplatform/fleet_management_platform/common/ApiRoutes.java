@@ -23,6 +23,14 @@ public class ApiRoutes {
         public static final String BIDS = "/bids";
         public static final String BIDS_MY = "/bids/my";
         public static final String BY_ID_BIDS = "/{id}/bids";
+        public static final String BY_ID_AWARD = "/{id}/award";
+    }
+
+    public static class Notification {
+        public static final String BASE = "/api/notifications";
+        public static final String UNREAD_COUNT = "/unread-count";
+        public static final String BY_ID_READ = "/{id}/read";
+        public static final String READ_ALL = "/read-all";
     }
 
     public static class Location {

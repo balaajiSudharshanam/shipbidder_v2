@@ -4,7 +4,8 @@ import { useFormatters } from '../../../common/hooks/useFormatters'
 import { useToast } from '../../../common/context/ToastContext'
 import { useUser } from '../../user/context/UserContext'
 import AppNav from '../../../common/components/AppNav'
-import { getJobById } from '../api/jobsApi'
+import NotificationDropdown from '../../notifications/components/NotificationDropdown'
+import { getJobById, awardBid } from '../api/jobsApi'
 import { getJobBids } from '../api/bidsApi'
 import ImageCarousel from '../components/ImageCarousel'
 import RouteMap from '../components/RouteMap'
@@ -14,10 +15,12 @@ import type { JobResponse, BidResponse } from '../types'
 
 const STATUS_COLOR: Record<string, string> = {
   OPEN: 'var(--c-dark)',
+  PENDING_AWARD: 'rgba(180,120,0,0.85)',
   AWARDED: 'var(--c-mid)',
   IN_TRANSIT: 'var(--c-mid)',
   COMPLETED: 'rgba(28,27,27,0.35)',
   CANCELLED: 'rgba(28,27,27,0.25)',
+  EXPIRED: 'rgba(28,27,27,0.25)',
 }
 
 const badgeBase: React.CSSProperties = {
@@ -46,7 +49,7 @@ function InfoRow({ label, value }: InfoRowProps) {
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { showError } = useToast()
+  const { showError, showSuccess } = useToast()
   const { user } = useUser()
   const { formatCurrency, formatDateTime, formatLocation } = useFormatters()
 
@@ -54,13 +57,25 @@ export default function JobDetailPage() {
   const [bids, setBids] = useState<BidResponse[]>([])
   const [jobLoading, setJobLoading] = useState(true)
   const [bidsLoading, setBidsLoading] = useState(false)
+  const [awarding, setAwarding] = useState(false)
 
   const jobId = Number(id)
   const isPoster = !!user && !!job && user.email === job.posterEmail
   const isBidder = user?.role === 'BIDDER'
+  const isPendingAward = job?.status === 'PENDING_AWARD'
+
+  const fetchJob = useCallback(async () => {
+    try {
+      setJob(await getJobById(jobId))
+    } catch (err: unknown) {
+      showError(err instanceof Error ? err.message : 'Failed to load job')
+    } finally {
+      setJobLoading(false)
+    }
+  }, [jobId, showError])
 
   const fetchBids = useCallback(async () => {
-    if (!isPoster) return
+    if (!isPoster && !isPendingAward) return
     setBidsLoading(true)
     try {
       setBids(await getJobBids(jobId))
@@ -69,16 +84,24 @@ export default function JobDetailPage() {
     } finally {
       setBidsLoading(false)
     }
-  }, [isPoster, jobId, showError])
+  }, [isPoster, isPendingAward, jobId, showError])
 
-  useEffect(() => {
-    getJobById(jobId)
-      .then(setJob)
-      .catch((err: unknown) => showError(err instanceof Error ? err.message : 'Failed to load job'))
-      .finally(() => setJobLoading(false))
-  }, [jobId, showError])
-
+  useEffect(() => { void fetchJob() }, [fetchJob])
   useEffect(() => { void fetchBids() }, [fetchBids])
+
+  async function handleAward(bidId: number) {
+    setAwarding(true)
+    try {
+      await awardBid(jobId, bidId)
+      showSuccess('Job awarded successfully!')
+      await fetchJob()
+      await fetchBids()
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to award bid')
+    } finally {
+      setAwarding(false)
+    }
+  }
 
   if (jobLoading) {
     return (
@@ -102,12 +125,27 @@ export default function JobDetailPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--c-light)' }}>
-      <AppNav onBack={() => navigate(-1)} />
+      <AppNav onBack={() => navigate(-1)} notificationsSlot={<NotificationDropdown />} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '2rem 1.5rem' }}>
+        {isPoster && isPendingAward && (
+          <div style={{
+            backgroundColor: 'rgba(180,120,0,0.1)',
+            border: '1px solid rgba(180,120,0,0.3)',
+            borderRadius: 8,
+            padding: '0.85rem 1.25rem',
+            marginBottom: '1.25rem',
+            fontSize: '0.875rem',
+            color: 'rgba(140,90,0,0.9)',
+            fontWeight: 600,
+          }}>
+            Auction closed — review the bids below and select a winner.
+          </div>
+        )}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
           <span style={{ ...badgeBase, backgroundColor: STATUS_COLOR[job.status] ?? 'var(--c-mid)' }}>
-            {job.status}
+            {job.status.replace('_', ' ')}
           </span>
           <span style={{ ...badgeBase, backgroundColor: 'rgba(71,69,69,0.1)', color: 'var(--c-mid)' }}>
             {job.shipment.cargoType}
@@ -204,7 +242,12 @@ export default function JobDetailPage() {
                     </span>
                   )}
                 </h2>
-                <BidList bids={bids} loading={bidsLoading} budgetCeiling={job.budgetCeiling} />
+                <BidList
+                  bids={bids}
+                  loading={bidsLoading || awarding}
+                  budgetCeiling={job.budgetCeiling}
+                  onAward={isPendingAward ? handleAward : undefined}
+                />
               </div>
             )}
 

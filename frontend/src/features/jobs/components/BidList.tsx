@@ -5,10 +5,12 @@ interface Props {
   bids: BidResponse[]
   loading: boolean
   budgetCeiling: number
+  onAward?: (bidId: number) => void
 }
 
-export default function BidList({ bids, loading, budgetCeiling }: Props) {
+export default function BidList({ bids, loading, budgetCeiling, onAward }: Props) {
   const { formatCurrency, formatDateTime } = useFormatters()
+
   if (loading) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(28,27,27,0.35)', fontSize: '0.875rem' }}>
@@ -84,14 +86,34 @@ export default function BidList({ bids, loading, budgetCeiling }: Props) {
               </div>
             </div>
 
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: '1rem', color: isLowest ? 'var(--c-light)' : 'var(--c-dark)' }}>
-                {formatCurrency(bid.amount)}
-              </div>
-              {isLowest && savings > 0 && (
-                <div style={{ fontSize: '0.72rem', color: 'rgba(243,243,243,0.6)' }}>
-                  saves {formatCurrency(savings)}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontWeight: 700, fontSize: '1rem', color: isLowest ? 'var(--c-light)' : 'var(--c-dark)' }}>
+                  {formatCurrency(bid.amount)}
                 </div>
+                {isLowest && savings > 0 && (
+                  <div style={{ fontSize: '0.72rem', color: 'rgba(243,243,243,0.6)' }}>
+                    saves {formatCurrency(savings)}
+                  </div>
+                )}
+              </div>
+              {onAward && (
+                <button
+                  onClick={() => onAward(bid.id)}
+                  style={{
+                    padding: '0.3rem 0.8rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    borderRadius: 5,
+                    border: isLowest ? '1px solid var(--c-light)' : '1px solid var(--c-dark)',
+                    backgroundColor: isLowest ? 'var(--c-light)' : 'var(--c-dark)',
+                    color: isLowest ? 'var(--c-dark)' : 'var(--c-light)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Award
+                </button>
               )}
             </div>
           </div>

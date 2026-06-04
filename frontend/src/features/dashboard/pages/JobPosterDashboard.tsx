@@ -4,6 +4,7 @@ import type { UserProfile } from '../../user/api/userApi'
 import { AppRoutes } from '../../../common/appRoutes'
 import { useToast } from '../../../common/context/ToastContext'
 import AppNav from '../../../common/components/AppNav'
+import NotificationDropdown from '../../notifications/components/NotificationDropdown'
 import { getMyJobs } from '../../jobs/api/jobsApi'
 import JobCard from '../../jobs/components/JobCard'
 import PostJobModal from '../../jobs/components/PostJobModal'
@@ -37,7 +38,7 @@ export default function JobPosterDashboard({ user }: Props) {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--c-light)' }}>
-      <AppNav userName={user.name} showSignOut />
+      <AppNav userName={user.name} showSignOut notificationsSlot={<NotificationDropdown />} />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
         <div style={{ marginBottom: '2rem' }}>

@@ -1,6 +1,9 @@
 this is logistic management platform where the user can add jobs and truck owners can bid for each job, lowest bid wins. this project will contain a reverse auction engine and ability to accomodate several bids at once also a route optimization module for driver to pickup other job on their way, and an AI assitant for both driver and the job poster, employer will have a dashboard to manage the fleet.
 
-
+### before every build
+- before every build i asking to build trigger /grill me skill
+- ask me how it should be built or created, dont take the architectural being said you are still allowed to provide suggestions
+-
 
 ### backedn logic
 - this project follows ddd pattern, every domain, application and mapper
@@ -67,4 +70,6 @@ Multi-line imports count total character length across all lines. Consolidate va
 - dont hardcode routes anywhere, you use apiroutes from common for backend,
 - create a endpoint file in frontend if not present and use endpoints from there
 - create a routes file in frontend if not present and use route from there all over the project
+
+### before every feature
 

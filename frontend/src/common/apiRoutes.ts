@@ -17,8 +17,15 @@ export const ApiRoutes = {
     BIDS: '/bids',
     BIDS_MY: '/bids/my',
     BY_ID_BIDS: (id: number) => `/${id}/bids`,
+    BY_ID_AWARD: (id: number) => `/${id}/award`,
   },
   Location: {
     BASE: '/api/locations',
+  },
+  Notification: {
+    BASE: '/api/notifications',
+    UNREAD_COUNT: '/unread-count',
+    BY_ID_READ: (id: number) => `/${id}/read`,
+    READ_ALL: '/read-all',
   },
 } as const

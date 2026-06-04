@@ -5,6 +5,7 @@ import { AppRoutes } from '../../../common/appRoutes'
 import { useToast } from '../../../common/context/ToastContext'
 import { useFormatters } from '../../../common/hooks/useFormatters'
 import AppNav from '../../../common/components/AppNav'
+import NotificationDropdown from '../../notifications/components/NotificationDropdown'
 import { getOpenJobs } from '../../jobs/api/jobsApi'
 import { getMyBids } from '../../jobs/api/bidsApi'
 import JobCard from '../../jobs/components/JobCard'
@@ -53,7 +54,7 @@ export default function CarrierDashboard({ user }: Props) {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--c-light)' }}>
-      <AppNav userName={user.name} showSignOut />
+      <AppNav userName={user.name} showSignOut notificationsSlot={<NotificationDropdown />} />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
         <div style={{ marginBottom: '2rem' }}>
