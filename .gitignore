@@ -36,3 +36,8 @@ target/
 .idea/
 logs/
 .claude/
+
+# Frontend
+node_modules/
+dist/
+*.local
