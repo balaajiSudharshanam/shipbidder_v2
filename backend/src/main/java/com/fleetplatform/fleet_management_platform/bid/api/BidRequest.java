@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 public class BidRequest {
-    private Long userId;
     private Long jobId;
     private BigDecimal amount;
 }

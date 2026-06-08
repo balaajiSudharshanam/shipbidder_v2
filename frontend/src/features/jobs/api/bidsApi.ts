@@ -1,12 +1,12 @@
 import { ApiRoutes } from '../../../common/apiRoutes'
 import type { BidResponse } from '../types'
 
-export async function placeBid(userId: number, jobId: number, amount: number): Promise<BidResponse> {
+export async function placeBid(jobId: number, amount: number): Promise<BidResponse> {
   const res = await fetch(`${ApiRoutes.Job.BASE}${ApiRoutes.Job.BIDS}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ userId, jobId, amount }),
+    body: JSON.stringify({ jobId, amount }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({})) as { detail?: string }

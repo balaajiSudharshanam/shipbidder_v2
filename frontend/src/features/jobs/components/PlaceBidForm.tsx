@@ -32,7 +32,7 @@ export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionC
     }
     setSubmitting(true)
     try {
-      await placeBid(user.id, jobId, parsed)
+      await placeBid(jobId, parsed)
       setSuccess(true)
       setAmount('')
     } catch (err) {

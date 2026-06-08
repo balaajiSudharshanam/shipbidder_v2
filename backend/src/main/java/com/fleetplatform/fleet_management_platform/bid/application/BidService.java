@@ -37,13 +37,16 @@ public class BidService {
     private final EmailService emailService;
 
     @Transactional
-    public BidResponse placeBid(BidRequest req) {
-        if (req.getUserId() == null || req.getJobId() == null) {
-            throw new BadRequestException("userId and jobId are required");
+    public BidResponse placeBid(BidRequest req, String bidderEmail) {
+        if (req.getJobId() == null) {
+            throw new BadRequestException("jobId is required");
         }
         if (req.getAmount() == null || req.getAmount().signum() <= 0) {
             throw new BadRequestException("Bid amount must be positive");
         }
+
+        User bidder = userRepository.findByEmail(bidderEmail)
+                .orElseThrow(() -> new NotFoundException("Bidder not found"));
 
         Job job = jobRepository.findById(req.getJobId())
                 .orElseThrow(() -> new NotFoundException("Job not found"));
@@ -52,7 +55,7 @@ public class BidService {
             throw new BadRequestException("Bidding is closed for this job");
         }
 
-        if (job.getAuctionClosesAt().isBefore(LocalDateTime.now())) {
+        if (job.getAuctionClosesAt() == null || job.getAuctionClosesAt().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Auction has already closed");
         }
 
@@ -60,14 +63,11 @@ public class BidService {
             throw new BadRequestException("Bid exceeds the budget ceiling");
         }
 
-        if (job.getPoster().getId().equals(req.getUserId())) {
+        if (job.getPoster().getId().equals(bidder.getId())) {
             throw new BadRequestException("Job posters cannot bid on their own jobs");
         }
 
-        User bidder = userRepository.findById(req.getUserId())
-                .orElseThrow(() -> new NotFoundException("Bidder not found"));
-
-        if (bidRepository.findByJobIdAndBidderId(req.getJobId(), req.getUserId()).isPresent()) {
+        if (bidRepository.findByJobIdAndBidderId(req.getJobId(), bidder.getId()).isPresent()) {
             throw new ConflictException("You have already placed a bid on this job");
         }
 

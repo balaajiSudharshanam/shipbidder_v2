@@ -21,8 +21,11 @@ public class BidController {
     @PostMapping(ApiRoutes.Job.BIDS)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('BIDDER')")
-    public BidResponse placeBid(@RequestBody BidRequest req) {
-        return bidService.placeBid(req);
+    public BidResponse placeBid(
+            @RequestBody BidRequest req,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return bidService.placeBid(req, userDetails.getUsername());
     }
 
     @GetMapping(ApiRoutes.Job.BIDS_MY)
