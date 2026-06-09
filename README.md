@@ -339,16 +339,6 @@ Real bugs hit during development, documented here as a reference.
 
 ---
 
-### 11. Any authenticated carrier could place bids as another user
-
-**Symptom:** `POST /api/jobs/bids` accepted a `userId` field in the request body. A carrier logged in as user A could set `userId` to user B's ID and place bids on their behalf — the server trusted the value without checking it against the active session.
-
-**Root cause:** `BidRequest` was designed early when identity was resolved client-side. The service looked up the bidder by `req.getUserId()` directly, and the controller never injected the authenticated principal into the call. The frontend also read `user.id` from React state and sent it in the body, meaning client state controlled who placed the bid.
-
-**Fix:** Removed `userId` from `BidRequest` entirely. The controller now injects `@AuthenticationPrincipal UserDetails` and passes `userDetails.getUsername()` (the session email) to the service. `BidService.placeBid` resolves the bidder with `userRepository.findByEmail(bidderEmail)` — the client has no say in identity. The ownership check (`poster cannot bid on own job`) was updated to compare against the server-resolved `bidder.getId()`. A null-guard was also added for `auctionClosesAt` to prevent an NPE on malformed job data.
-
----
-
 ### 10. Formatting utilities duplicated across components
 
 **Symptom:** `formatCurrency`, `formatDate`, and `formatLocation` were defined as local functions in `JobCard`, `BidList`, and `JobDetailPage` independently, with slightly inconsistent formatting options.
@@ -356,6 +346,15 @@ Real bugs hit during development, documented here as a reference.
 **Root cause:** Each component was written in isolation with its own local helpers.
 
 **Fix:** Extracted all formatters into `common/hooks/useFormatters.ts` returning `{ formatCurrency, formatDate, formatDateTime, formatLocation }`. All components now call the hook instead of defining their own.
+
+---
+### 11. Any authenticated carrier could place bids as another user
+
+**Symptom:** `POST /api/jobs/bids` accepted a `userId` field in the request body. A carrier logged in as user A could set `userId` to user B's ID and place bids on their behalf — the server trusted the value without checking it against the active session.
+
+**Root cause:** `BidRequest` was designed early when identity was resolved client-side. The service looked up the bidder by `req.getUserId()` directly, and the controller never injected the authenticated principal into the call. The frontend also read `user.id` from React state and sent it in the body, meaning client state controlled who placed the bid.
+
+**Fix:** Removed `userId` from `BidRequest` entirely. The controller now injects `@AuthenticationPrincipal UserDetails` and passes `userDetails.getUsername()` (the session email) to the service. `BidService.placeBid` resolves the bidder with `userRepository.findByEmail(bidderEmail)` — the client has no say in identity. The ownership check (`poster cannot bid on own job`) was updated to compare against the server-resolved `bidder.getId()`. A null-guard was also added for `auctionClosesAt` to prevent an NPE on malformed job data.
 
 ---
 

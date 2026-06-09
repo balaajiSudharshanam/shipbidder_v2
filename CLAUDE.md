@@ -71,10 +71,5 @@ Multi-line imports count total character length across all lines. Consolidate va
 - create a endpoint file in frontend if not present and use endpoints from there
 - create a routes file in frontend if not present and use route from there all over the project
 
-### before every commit or push
-- trigger the /commit skill before every git commit or push — no exceptions
-- the skill checks for merge conflicts, updates README.md changelog, and drafts the commit message
-- never commit or push until the skill has run and the user has confirmed the message
-
 ### before every feature
 
