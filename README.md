@@ -210,7 +210,7 @@ docker compose -f docker-compose.yml up --build -d
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/jobs/bids` | BIDDER | Place a bid — body: `{userId, jobId, amount}` |
+| `POST` | `/api/jobs/bids` | BIDDER | Place a bid — body: `{jobId, amount}` |
 | `GET` | `/api/jobs/bids/my` | BIDDER | List my own bids, newest first |
 | `GET` | `/api/jobs/{id}/bids` | JOB_POSTER (owner) | View all bids for a job, sorted lowest first |
 
@@ -336,6 +336,16 @@ Real bugs hit during development, documented here as a reference.
 **Root cause:** No shared nav component existed; each page copy-pasted the structure with slight variations (some had a back button, some had a sign-out button).
 
 **Fix:** Extracted `AppNav` into `common/components/AppNav.tsx` with three props — `onBack`, `userName`, and `showSignOut` — covering all variants. All pages now import and use `AppNav`.
+
+---
+
+### 11. Any authenticated carrier could place bids as another user
+
+**Symptom:** `POST /api/jobs/bids` accepted a `userId` field in the request body. A carrier logged in as user A could set `userId` to user B's ID and place bids on their behalf — the server trusted the value without checking it against the active session.
+
+**Root cause:** `BidRequest` was designed early when identity was resolved client-side. The service looked up the bidder by `req.getUserId()` directly, and the controller never injected the authenticated principal into the call. The frontend also read `user.id` from React state and sent it in the body, meaning client state controlled who placed the bid.
+
+**Fix:** Removed `userId` from `BidRequest` entirely. The controller now injects `@AuthenticationPrincipal UserDetails` and passes `userDetails.getUsername()` (the session email) to the service. `BidService.placeBid` resolves the bidder with `userRepository.findByEmail(bidderEmail)` — the client has no say in identity. The ownership check (`poster cannot bid on own job`) was updated to compare against the server-resolved `bidder.getId()`. A null-guard was also added for `auctionClosesAt` to prevent an NPE on malformed job data.
 
 ---
 
