@@ -20,11 +20,13 @@ import com.fleetplatform.fleet_management_platform.notification.domain.Notificat
 import com.fleetplatform.fleet_management_platform.user.domain.User;
 import com.fleetplatform.fleet_management_platform.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -67,10 +69,6 @@ public class BidService {
             throw new BadRequestException("Job posters cannot bid on their own jobs");
         }
 
-        if (bidRepository.findByJobIdAndBidderId(req.getJobId(), bidder.getId()).isPresent()) {
-            throw new ConflictException("You have already placed a bid on this job");
-        }
-
         Bid bid = Bid.builder()
                 .job(job)
                 .bidder(bidder)
@@ -79,7 +77,11 @@ public class BidService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return BidMapper.toResponse(bidRepository.save(bid));
+        try {
+            return BidMapper.toResponse(bidRepository.save(bid));
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException("You have already placed a bid on this job");
+        }
     }
 
     @Transactional
@@ -122,6 +124,12 @@ public class BidService {
         }
 
         return BidMapper.toResponse(winner);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<BidResponse> getMyBidForJob(Long jobId, String bidderEmail) {
+        return bidRepository.findByJobIdAndBidderEmail(jobId, bidderEmail)
+                .map(BidMapper::toResponse);
     }
 
     @Transactional(readOnly = true)

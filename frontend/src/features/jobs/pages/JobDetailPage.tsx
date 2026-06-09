@@ -6,10 +6,11 @@ import { useUser } from '../../user/context/UserContext'
 import AppNav from '../../../common/components/AppNav'
 import NotificationDropdown from '../../notifications/components/NotificationDropdown'
 import { getJobById, awardBid } from '../api/jobsApi'
-import { getJobBids } from '../api/bidsApi'
+import { getJobBids, getMyBidForJob } from '../api/bidsApi'
 import ImageCarousel from '../components/ImageCarousel'
 import RouteMap from '../components/RouteMap'
 import BidList from '../components/BidList'
+import MyBidCard from '../components/MyBidCard'
 import PlaceBidForm from '../components/PlaceBidForm'
 import type { JobResponse, BidResponse } from '../types'
 
@@ -55,6 +56,7 @@ export default function JobDetailPage() {
 
   const [job, setJob] = useState<JobResponse | null>(null)
   const [bids, setBids] = useState<BidResponse[]>([])
+  const [myBid, setMyBid] = useState<BidResponse | null>(null)
   const [jobLoading, setJobLoading] = useState(true)
   const [bidsLoading, setBidsLoading] = useState(false)
   const [awarding, setAwarding] = useState(false)
@@ -86,8 +88,18 @@ export default function JobDetailPage() {
     }
   }, [isPoster, isPendingAward, jobId, showError])
 
+  const fetchMyBid = useCallback(async () => {
+    if (!isBidder) return
+    try {
+      setMyBid(await getMyBidForJob(jobId))
+    } catch {
+      // non-critical — form stays visible if this fails
+    }
+  }, [isBidder, jobId])
+
   useEffect(() => { void fetchJob() }, [fetchJob])
   useEffect(() => { void fetchBids() }, [fetchBids])
+  useEffect(() => { void fetchMyBid() }, [fetchMyBid])
 
   async function handleAward(bidId: number) {
     setAwarding(true)
@@ -259,14 +271,19 @@ export default function JobDetailPage() {
                 padding: '1.25rem',
               }}>
                 <h2 style={{ margin: '0 0 1rem', fontWeight: 700, fontSize: '1rem', color: 'var(--c-dark)' }}>
-                  Place a Bid
+                  {myBid ? 'Your Bid' : 'Place a Bid'}
                 </h2>
-                <PlaceBidForm
-                  jobId={job.id}
-                  budgetCeiling={job.budgetCeiling}
-                  jobStatus={job.status}
-                  auctionClosesAt={job.auctionClosesAt}
-                />
+                {myBid ? (
+                  <MyBidCard bid={myBid} />
+                ) : (
+                  <PlaceBidForm
+                    jobId={job.id}
+                    budgetCeiling={job.budgetCeiling}
+                    jobStatus={job.status}
+                    auctionClosesAt={job.auctionClosesAt}
+                    onBidPlaced={() => void fetchMyBid()}
+                  />
+                )}
               </div>
             )}
           </div>

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 @RestController
 @RequestMapping(ApiRoutes.Job.BASE)
 @RequiredArgsConstructor
@@ -26,6 +28,17 @@ public class BidController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return bidService.placeBid(req, userDetails.getUsername());
+    }
+
+    @GetMapping(ApiRoutes.Job.BY_ID_MY_BID)
+    @PreAuthorize("hasRole('BIDDER')")
+    public ResponseEntity<BidResponse> getMyBidForJob(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return bidService.getMyBidForJob(id, userDetails.getUsername())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @GetMapping(ApiRoutes.Job.BIDS_MY)

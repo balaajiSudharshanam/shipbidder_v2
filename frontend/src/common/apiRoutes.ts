@@ -18,6 +18,7 @@ export const ApiRoutes = {
     BIDS_MY: '/bids/my',
     BY_ID_BIDS: (id: number) => `/${id}/bids`,
     BY_ID_AWARD: (id: number) => `/${id}/award`,
+    BY_ID_MY_BID: (id: number) => `/${id}/my-bid`,
   },
   Location: {
     BASE: '/api/locations',

@@ -15,5 +15,6 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     @Query("SELECT b FROM Bid b JOIN FETCH b.job WHERE b.bidder.email = :email ORDER BY b.createdAt DESC")
     List<Bid> findByBidderEmailOrderByCreatedAtDesc(@Param("email") String email);
 
-    Optional<Bid> findByJobIdAndBidderId(Long jobId, Long bidderId);
+    @Query("SELECT b FROM Bid b WHERE b.job.id = :jobId AND b.bidder.email = :email")
+    Optional<Bid> findByJobIdAndBidderEmail(@Param("jobId") Long jobId, @Param("email") String email);
 }

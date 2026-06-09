@@ -8,9 +8,10 @@ interface Props {
   budgetCeiling: number
   jobStatus: string
   auctionClosesAt: string
+  onBidPlaced?: () => void
 }
 
-export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionClosesAt }: Props) {
+export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionClosesAt, onBidPlaced }: Props) {
   const { showError } = useToast()
   const { user } = useUser()
   const [amount, setAmount] = useState('')
@@ -35,6 +36,7 @@ export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionC
       await placeBid(jobId, parsed)
       setSuccess(true)
       setAmount('')
+      onBidPlaced?.()
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Failed to place bid')
     } finally {

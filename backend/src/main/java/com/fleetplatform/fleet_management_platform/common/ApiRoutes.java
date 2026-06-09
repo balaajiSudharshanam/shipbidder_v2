@@ -24,6 +24,7 @@ public class ApiRoutes {
         public static final String BIDS_MY = "/bids/my";
         public static final String BY_ID_BIDS = "/{id}/bids";
         public static final String BY_ID_AWARD = "/{id}/award";
+        public static final String BY_ID_MY_BID = "/{id}/my-bid";
     }
 
     public static class Notification {
