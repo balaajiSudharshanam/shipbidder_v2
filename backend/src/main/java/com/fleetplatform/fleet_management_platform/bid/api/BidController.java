@@ -2,6 +2,7 @@ package com.fleetplatform.fleet_management_platform.bid.api;
 
 import com.fleetplatform.fleet_management_platform.bid.application.BidService;
 import com.fleetplatform.fleet_management_platform.common.ApiRoutes;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +25,7 @@ public class BidController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('BIDDER')")
     public BidResponse placeBid(
-            @RequestBody BidRequest req,
+            @Valid @RequestBody BidRequest req,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return bidService.placeBid(req, userDetails.getUsername());

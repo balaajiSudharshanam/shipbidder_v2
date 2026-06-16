@@ -41,13 +41,6 @@ public class BidService {
 
     @Transactional
     public BidResponse placeBid(BidRequest req, String bidderEmail) {
-        if (req.getJobId() == null) {
-            throw new BadRequestException("jobId is required");
-        }
-        if (req.getAmount() == null || req.getAmount().signum() <= 0) {
-            throw new BadRequestException("Bid amount must be positive");
-        }
-
         User bidder = userRepository.findByEmail(bidderEmail)
                 .orElseThrow(() -> new NotFoundException("Bidder not found"));
 
@@ -166,9 +159,13 @@ public class BidService {
         }
         if (condition.getConditionNote() != null && !condition.getConditionNote().isBlank()) {
             if (sb.length() > 0) sb.append(", ");
-            sb.append(condition.getConditionNote());
+            sb.append(sanitize(condition.getConditionNote()));
         }
         return " Conditions accepted: " + sb + ".";
+    }
+
+    private String sanitize(String input) {
+        return input.replaceAll("[\\r\\n\\t]", " ").trim();
     }
 
     @Transactional(readOnly = true)
