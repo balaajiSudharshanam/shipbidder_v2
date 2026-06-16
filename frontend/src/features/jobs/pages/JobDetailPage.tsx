@@ -52,7 +52,7 @@ export default function JobDetailPage() {
   const navigate = useNavigate()
   const { showError, showSuccess } = useToast()
   const { user } = useUser()
-  const { formatCurrency, formatDateTime, formatLocation } = useFormatters()
+  const { formatCurrency, formatDate, formatDateTime, formatLocation } = useFormatters()
 
   const [job, setJob] = useState<JobResponse | null>(null)
   const [bids, setBids] = useState<BidResponse[]>([])
@@ -234,6 +234,9 @@ export default function JobDetailPage() {
               <h2 style={{ margin: '0 0 0.25rem', fontWeight: 700, fontSize: '1rem', color: 'var(--c-dark)' }}>Auction</h2>
               <InfoRow label="Budget ceiling" value={formatCurrency(job.budgetCeiling)} />
               <InfoRow label="Closes" value={formatDateTime(job.auctionClosesAt)} />
+              {job.expectedDeliveryDate && (
+                <InfoRow label="Expected delivery" value={formatDate(job.expectedDeliveryDate)} />
+              )}
               {bids.length > 0 && isPoster && (
                 <InfoRow label="Current lowest" value={formatCurrency(bids[0].amount)} />
               )}

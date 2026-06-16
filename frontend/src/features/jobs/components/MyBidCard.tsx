@@ -1,5 +1,5 @@
 import { useFormatters } from '../../../common/hooks/useFormatters'
-import type { BidResponse, BidStatus } from '../types'
+import type { BidCondition, BidResponse, BidStatus } from '../types'
 
 interface Props {
   bid: BidResponse
@@ -15,6 +15,24 @@ const STATUS_STYLE: Record<BidStatus, React.CSSProperties> = {
   PENDING: { backgroundColor: 'rgba(71,69,69,0.08)', color: '#474545' },
   ACCEPTED: { backgroundColor: 'rgba(40,120,60,0.1)', color: '#1a6b35' },
   REJECTED: { backgroundColor: 'rgba(28,27,27,0.06)', color: 'rgba(28,27,27,0.4)' },
+}
+
+function ConditionTag({ condition }: { condition: BidCondition }) {
+  const { formatDate } = useFormatters()
+  const tags: string[] = []
+  if (condition.sharedLoad) tags.push('Shared load')
+  if (condition.alternateDeliveryDate) tags.push(`Delivery by ${formatDate(condition.alternateDeliveryDate)}`)
+  if (condition.conditionNote) tags.push(condition.conditionNote)
+  if (tags.length === 0) return null
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '0.5rem' }}>
+      {tags.map(tag => (
+        <span key={tag} style={{ fontSize: '0.78rem', color: 'rgba(28,27,27,0.55)', backgroundColor: 'rgba(28,27,27,0.05)', borderRadius: 4, padding: '0.2rem 0.5rem', display: 'inline-block' }}>
+          {tag}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 export default function MyBidCard({ bid }: Props) {
@@ -55,6 +73,7 @@ export default function MyBidCard({ bid }: Props) {
           This job was awarded to another carrier.
         </p>
       )}
+      {bid.condition && <ConditionTag condition={bid.condition} />}
     </div>
   )
 }

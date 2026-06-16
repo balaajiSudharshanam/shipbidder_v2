@@ -38,4 +38,7 @@ public class Bid {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Embedded
+    private BidCondition condition;
 }

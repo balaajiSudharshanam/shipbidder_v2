@@ -1,16 +1,13 @@
 package com.fleetplatform.fleet_management_platform.bid.api;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
-@NoArgsConstructor
-public class BidRequest {
-    private Long jobId;
-    private BigDecimal amount;
+@AllArgsConstructor
+public class BidConditionResponse {
     private Boolean sharedLoad;
     private LocalDate alternateDeliveryDate;
     private String conditionNote;

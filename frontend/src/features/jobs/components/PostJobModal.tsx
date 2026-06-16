@@ -24,6 +24,7 @@ export default function PostJobModal({ onClose, onSuccess }: Props) {
   const [images, setImages] = useState<File[]>([])
   const [budgetCeiling, setBudgetCeiling] = useState('')
   const [auctionClosesAt, setAuctionClosesAt] = useState('')
+  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   const handleClose = useCallback(() => {
@@ -56,6 +57,7 @@ export default function PostJobModal({ onClose, onSuccess }: Props) {
         shipment: shipment as ShipmentPayload,
         budgetCeiling: Number(budgetCeiling),
         auctionClosesAt: auctionClosesAt.length === 16 ? `${auctionClosesAt}:00` : auctionClosesAt,
+        ...(expectedDeliveryDate ? { expectedDeliveryDate } : {}),
       })
       if (images.length > 0) {
         await uploadJobImages(job.id, images)
@@ -152,8 +154,10 @@ export default function PostJobModal({ onClose, onSuccess }: Props) {
             <TermsStep
               budgetCeiling={budgetCeiling}
               auctionClosesAt={auctionClosesAt}
+              expectedDeliveryDate={expectedDeliveryDate}
               onBudgetChange={setBudgetCeiling}
               onAuctionChange={setAuctionClosesAt}
+              onDeliveryDateChange={setExpectedDeliveryDate}
               onSubmit={() => void handleSubmit()}
               onBack={() => setStep(1)}
               submitting={submitting}

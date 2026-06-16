@@ -19,6 +19,19 @@ export interface CreateJobPayload {
   shipment: ShipmentPayload
   budgetCeiling: number
   auctionClosesAt: string
+  expectedDeliveryDate?: string
+}
+
+export interface BidCondition {
+  sharedLoad: boolean | null
+  alternateDeliveryDate: string | null
+  conditionNote: string | null
+}
+
+export interface BidConditionInput {
+  sharedLoad?: boolean
+  alternateDeliveryDate?: string
+  conditionNote?: string
 }
 
 export interface ShipmentResponse {
@@ -41,6 +54,7 @@ export interface JobResponse {
   status: string
   budgetCeiling: number
   auctionClosesAt: string
+  expectedDeliveryDate: string | null
   pickup: LocationResponse
   dropoff: LocationResponse
   shipment: ShipmentResponse
@@ -58,4 +72,5 @@ export interface BidResponse {
   amount: number
   status: BidStatus
   createdAt: string
+  condition: BidCondition | null
 }

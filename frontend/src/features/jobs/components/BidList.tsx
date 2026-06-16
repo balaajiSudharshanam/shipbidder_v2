@@ -1,11 +1,35 @@
 import { useFormatters } from '../../../common/hooks/useFormatters'
-import type { BidResponse } from '../types'
+import type { BidCondition, BidResponse } from '../types'
 
 interface Props {
   bids: BidResponse[]
   loading: boolean
   budgetCeiling: number
   onAward?: (bidId: number) => void
+}
+
+function ConditionPills({ condition, dark }: { condition: BidCondition; dark: boolean }) {
+  const { formatDate } = useFormatters()
+  const tags: string[] = []
+  if (condition.sharedLoad) tags.push('Shared load')
+  if (condition.alternateDeliveryDate) tags.push(`Delivery by ${formatDate(condition.alternateDeliveryDate)}`)
+  if (condition.conditionNote) tags.push(condition.conditionNote)
+  if (tags.length === 0) return null
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: '0.4rem' }}>
+      {tags.map(tag => (
+        <span key={tag} style={{
+          fontSize: '0.72rem',
+          padding: '0.15rem 0.45rem',
+          borderRadius: 3,
+          backgroundColor: dark ? 'rgba(243,243,243,0.12)' : 'rgba(28,27,27,0.06)',
+          color: dark ? 'rgba(243,243,243,0.7)' : 'rgba(28,27,27,0.5)',
+        }}>
+          {tag}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 export default function BidList({ bids, loading, budgetCeiling, onAward }: Props) {
@@ -83,6 +107,7 @@ export default function BidList({ bids, loading, budgetCeiling, onAward }: Props
                 <div style={{ fontSize: '0.75rem', color: isLowest ? 'rgba(243,243,243,0.55)' : 'rgba(28,27,27,0.4)' }}>
                   {formatDateTime(bid.createdAt)}
                 </div>
+                {bid.condition && <ConditionPills condition={bid.condition} dark={isLowest} />}
               </div>
             </div>
 

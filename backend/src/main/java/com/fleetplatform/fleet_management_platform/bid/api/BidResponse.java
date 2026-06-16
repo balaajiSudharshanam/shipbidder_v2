@@ -18,4 +18,5 @@ public class BidResponse {
     private BigDecimal amount;
     private BidStatus status;
     private LocalDateTime createdAt;
+    private BidConditionResponse condition;
 }

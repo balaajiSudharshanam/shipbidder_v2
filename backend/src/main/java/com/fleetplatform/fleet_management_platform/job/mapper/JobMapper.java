@@ -20,7 +20,8 @@ public class JobMapper {
                 LocationMapper.toResponse(job.getPickup()),
                 LocationMapper.toResponse(job.getDropoff()),
                 ShipmentMapper.toResponse(job.getShipment()),
-                job.getCreatedAt()
+                job.getCreatedAt(),
+                job.getExpectedDeliveryDate()
         );
     }
 }

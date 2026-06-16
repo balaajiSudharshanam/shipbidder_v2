@@ -17,6 +17,10 @@ export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionC
   const [amount, setAmount] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [showConditions, setShowConditions] = useState(false)
+  const [sharedLoad, setSharedLoad] = useState(false)
+  const [alternateDeliveryDate, setAlternateDeliveryDate] = useState('')
+  const [conditionNote, setConditionNote] = useState('')
 
   const isClosed = jobStatus !== 'OPEN' || new Date(auctionClosesAt) < new Date()
 
@@ -31,9 +35,16 @@ export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionC
       showError('You must be logged in to place a bid')
       return
     }
+    const condition = showConditions && (sharedLoad || alternateDeliveryDate || conditionNote.trim())
+      ? {
+          ...(sharedLoad ? { sharedLoad } : {}),
+          ...(alternateDeliveryDate ? { alternateDeliveryDate } : {}),
+          ...(conditionNote.trim() ? { conditionNote: conditionNote.trim() } : {}),
+        }
+      : undefined
     setSubmitting(true)
     try {
-      await placeBid(jobId, parsed)
+      await placeBid(jobId, parsed, condition)
       setSuccess(true)
       setAmount('')
       onBidPlaced?.()
@@ -117,6 +128,67 @@ export default function PlaceBidForm({ jobId, budgetCeiling, jobStatus, auctionC
         <p style={{ fontSize: '0.78rem', color: 'rgba(28,27,27,0.4)', margin: '0.35rem 0 0' }}>
           Budget ceiling: ${budgetCeiling.toLocaleString()} — lowest bid wins
         </p>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowConditions(v => !v)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            color: 'rgba(28,27,27,0.5)',
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.3rem',
+          }}
+        >
+          {showConditions ? '▾' : '▸'} Add shipping conditions (optional)
+        </button>
+
+        {showConditions && (
+          <div style={{ marginTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.85rem', paddingLeft: '0.75rem', borderLeft: '2px solid rgba(28,27,27,0.1)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--c-dark)', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={sharedLoad}
+                onChange={e => setSharedLoad(e.target.checked)}
+              />
+              Ship with other goods (shared load)
+            </label>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--c-dark)', marginBottom: '0.3rem' }}>
+                Alternate delivery date
+              </label>
+              <input
+                type="date"
+                value={alternateDeliveryDate}
+                onChange={e => setAlternateDeliveryDate(e.target.value)}
+                style={{ padding: '0.45rem 0.65rem', border: '1px solid rgba(28,27,27,0.2)', borderRadius: 6, fontSize: '0.875rem', color: 'var(--c-dark)' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--c-dark)', marginBottom: '0.3rem' }}>
+                Additional notes
+              </label>
+              <textarea
+                value={conditionNote}
+                onChange={e => setConditionNote(e.target.value)}
+                maxLength={500}
+                rows={3}
+                placeholder="e.g. Can pick up Tuesday afternoon only"
+                style={{ width: '100%', padding: '0.45rem 0.65rem', border: '1px solid rgba(28,27,27,0.2)', borderRadius: 6, fontSize: '0.875rem', color: 'var(--c-dark)', resize: 'vertical', boxSizing: 'border-box' }}
+              />
+              <span style={{ fontSize: '0.75rem', color: 'rgba(28,27,27,0.35)' }}>{conditionNote.length}/500</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <button

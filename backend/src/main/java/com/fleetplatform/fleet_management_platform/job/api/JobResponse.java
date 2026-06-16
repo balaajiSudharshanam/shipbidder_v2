@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -22,4 +23,5 @@ public class JobResponse {
     private LocationResponse dropoff;
     private ShipmentResponse shipment;
     private LocalDateTime createdAt;
+    private LocalDate expectedDeliveryDate;
 }

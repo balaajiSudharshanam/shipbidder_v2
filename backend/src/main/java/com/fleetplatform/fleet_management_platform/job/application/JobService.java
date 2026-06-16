@@ -57,6 +57,7 @@ public class JobService {
                 .status(JobStatus.OPEN)
                 .budgetCeiling(req.getBudgetCeiling())
                 .auctionClosesAt(req.getAuctionClosesAt())
+                .expectedDeliveryDate(req.getExpectedDeliveryDate())
                 .pickup(pickup)
                 .dropoff(dropoff)
                 .shipment(shipment)

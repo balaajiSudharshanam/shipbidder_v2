@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -30,4 +31,7 @@ public class CreateJobRequest {
     @Valid
     @NotNull
     private ShipmentRequest shipment;
+
+    @Future
+    private LocalDate expectedDeliveryDate;
 }

@@ -1,8 +1,10 @@
 interface Props {
   budgetCeiling: string
   auctionClosesAt: string
+  expectedDeliveryDate: string
   onBudgetChange: (v: string) => void
   onAuctionChange: (v: string) => void
+  onDeliveryDateChange: (v: string) => void
   onSubmit: () => void
   onBack: () => void
   submitting: boolean
@@ -19,7 +21,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 }
 
-export default function TermsStep({ budgetCeiling, auctionClosesAt, onBudgetChange, onAuctionChange, onSubmit, onBack, submitting }: Props) {
+export default function TermsStep({ budgetCeiling, auctionClosesAt, expectedDeliveryDate, onBudgetChange, onAuctionChange, onDeliveryDateChange, onSubmit, onBack, submitting }: Props) {
   const minDateTime = new Date()
   minDateTime.setMinutes(minDateTime.getMinutes() + 5)
   const minStr = minDateTime.toISOString().slice(0, 16)
@@ -64,6 +66,21 @@ export default function TermsStep({ budgetCeiling, auctionClosesAt, onBudgetChan
           onChange={e => onAuctionChange(e.target.value)}
           style={inputStyle}
         />
+      </div>
+
+      <div style={{ marginBottom: '1.25rem' }}>
+        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: 'var(--c-dark)', marginBottom: '0.4rem' }}>
+          Expected Delivery Date <span style={{ fontWeight: 400, color: 'rgba(28,27,27,0.4)' }}>(optional)</span>
+        </label>
+        <input
+          type="date"
+          value={expectedDeliveryDate}
+          onChange={e => onDeliveryDateChange(e.target.value)}
+          style={inputStyle}
+        />
+        <p style={{ fontSize: '0.8rem', color: 'rgba(28,27,27,0.45)', margin: '0.35rem 0 0' }}>
+          Carriers can propose an alternate date when bidding.
+        </p>
       </div>
 
       <div style={{ display: 'flex', gap: '0.75rem' }}>
