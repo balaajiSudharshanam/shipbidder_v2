@@ -1,4 +1,4 @@
-this is logistic management platform where the user can add jobs and truck owners can bid for each job, lowest bid wins. this project will contain a reverse auction engine and ability to accomodate several bids at once also a route optimization module for driver to pickup other job on their way, and an AI assitant for both driver and the job poster, employer will have a dashboard to manage the fleet.
+this is logistic management platform where the user can add jobs and truck owners can bid for each job. the poster manually selects the winner from pending bids — lowest bid is shown prominently but the poster makes the final call (bidders can attach conditions like shared load or alternate delivery dates that affect the real value of a bid). this project will contain a reverse auction engine and ability to accomodate several bids at once also a route optimization module for driver to pickup other job on their way, and an AI assitant for both driver and the job poster, employer will have a dashboard to manage the fleet.
 
 ### before every build
 - before every build i asking to build trigger /grill me skill

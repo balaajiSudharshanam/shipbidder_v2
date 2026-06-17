@@ -358,6 +358,23 @@ Real bugs hit during development, documented here as a reference.
 
 ---
 
+## Changelog
+
+### [feat] Auction closing — 2026-06-17
+
+**What:** Auctions now close automatically on schedule, notify all parties, and surface pending-award jobs
+prominently on the poster dashboard.
+**Why:** The scheduler stub existed but had no poster notification, no zero-bid handling, and the dashboard
+gave no visual signal that a poster needed to act.
+**How:** `AuctionScheduler` moved to a 5-minute cron and gained three behaviours: zero-bid jobs skip
+`PENDING_AWARD` and go straight to `EXPIRED`; the poster is notified (in-app + email) with the bid count
+when their auction closes; a 12-hour reminder fires halfway through the 24-hour grace period using a
+`reminderSent` flag on `Job` to guarantee exactly-once delivery. The poster dashboard now separates
+`PENDING_AWARD` jobs into an amber "Action required" section above all other jobs, and `JobCard` renders
+the correct amber badge and "Select winner →" prompt for that state.
+
+---
+
 <div align="center">
   <p>Built by <strong>Balaaji Sudharshanam</strong></p>
 </div>

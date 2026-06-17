@@ -30,11 +30,21 @@ export default function JobPosterDashboard({ user }: Props) {
 
   useEffect(() => { loadJobs() }, [])
 
+  const pendingAwardJobs = jobs.filter(j => j.status === 'PENDING_AWARD')
+  const otherJobs = jobs.filter(j => j.status !== 'PENDING_AWARD')
+
   const stats = [
-    { label: 'Jobs Posted',      value: jobs.length },
-    { label: 'Active Auctions',  value: jobs.filter(j => j.status === 'OPEN').length },
-    { label: 'Completed',        value: jobs.filter(j => j.status === 'COMPLETED').length },
+    { label: 'Jobs Posted',     value: jobs.length },
+    { label: 'Active Auctions', value: jobs.filter(j => j.status === 'OPEN').length },
+    { label: 'Awaiting Award',  value: pendingAwardJobs.length, highlight: pendingAwardJobs.length > 0 },
+    { label: 'Completed',       value: jobs.filter(j => j.status === 'COMPLETED').length },
   ]
+
+  const cardGrid: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gap: '1rem',
+  }
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--c-light)' }}>
@@ -52,12 +62,19 @@ export default function JobPosterDashboard({ user }: Props) {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
           gap: '1rem',
           marginBottom: '2rem',
         }}>
-          {stats.map(({ label, value }) => (
-            <div key={label} style={{ backgroundColor: 'var(--c-mid)', borderRadius: 10, padding: '1.5rem' }}>
+          {stats.map(({ label, value, highlight }) => (
+            <div
+              key={label}
+              style={{
+                backgroundColor: highlight ? 'rgba(180,120,0,0.85)' : 'var(--c-mid)',
+                borderRadius: 10,
+                padding: '1.5rem',
+              }}
+            >
               <div style={{ color: 'var(--c-light)', fontSize: '2.25rem', fontWeight: 700, lineHeight: 1 }}>
                 {loading ? '—' : value}
               </div>
@@ -78,9 +95,43 @@ export default function JobPosterDashboard({ user }: Props) {
           </button>
         </div>
 
+        {!loading && pendingAwardJobs.length > 0 && (
+          <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{
+              backgroundColor: 'rgba(180,120,0,0.08)',
+              border: '1px solid rgba(180,120,0,0.25)',
+              borderRadius: 8,
+              padding: '0.75rem 1.1rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'rgba(140,90,0,0.9)' }}>
+                Action required
+              </span>
+              <span style={{ fontSize: '0.875rem', color: 'rgba(140,90,0,0.7)' }}>
+                — {pendingAwardJobs.length === 1
+                  ? '1 auction has closed and is awaiting your selection.'
+                  : `${pendingAwardJobs.length} auctions have closed and are awaiting your selection.`}
+              </span>
+            </div>
+            <div style={cardGrid}>
+              {pendingAwardJobs.map(job => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  variant="poster"
+                  onClick={() => navigate(AppRoutes.jobDetail(job.id))}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
           <h2 style={{ color: 'var(--c-dark)', fontWeight: 700, fontSize: '1.1rem', margin: '0 0 1rem' }}>
-            Recent Jobs
+            {pendingAwardJobs.length > 0 ? 'Other Jobs' : 'Recent Jobs'}
           </h2>
 
           {loading && (
@@ -89,7 +140,7 @@ export default function JobPosterDashboard({ user }: Props) {
             </div>
           )}
 
-          {!loading && jobs.length === 0 && (
+          {!loading && otherJobs.length === 0 && pendingAwardJobs.length === 0 && (
             <div style={{
               backgroundColor: 'white',
               border: '1px solid rgba(28,27,27,0.08)',
@@ -103,14 +154,15 @@ export default function JobPosterDashboard({ user }: Props) {
             </div>
           )}
 
-          {!loading && jobs.length > 0 && (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '1rem',
-            }}>
-              {jobs.map(job => (
-                <JobCard key={job.id} job={job} variant="poster" onClick={() => navigate(AppRoutes.jobDetail(job.id))} />
+          {!loading && otherJobs.length > 0 && (
+            <div style={cardGrid}>
+              {otherJobs.map(job => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  variant="poster"
+                  onClick={() => navigate(AppRoutes.jobDetail(job.id))}
+                />
               ))}
             </div>
           )}

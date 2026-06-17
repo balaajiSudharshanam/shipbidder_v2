@@ -31,27 +31,65 @@ public class AuctionScheduler {
     @Value("${app.auction.grace-period-hours:24}")
     private int gracePeriodHours;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     @Transactional
     public void processAuctions() {
         LocalDateTime now = LocalDateTime.now();
         closeExpiredAuctions(now);
+        sendPendingAwardReminders(now);
         expireUnawarded(now);
     }
 
     private void closeExpiredAuctions(LocalDateTime now) {
         List<Job> jobs = jobRepository.findByStatusAndAuctionClosesAtBefore(JobStatus.OPEN, now);
         for (Job job : jobs) {
-            job.setStatus(JobStatus.PENDING_AWARD);
             List<Bid> bids = bidRepository.findByJobIdOrderByAmountAsc(job.getId());
-            for (Bid bid : bids) {
+
+            if (bids.isEmpty()) {
+                job.setStatus(JobStatus.EXPIRED);
                 String msg = String.format(
-                        "The auction for Job #%d has closed. The job poster is now selecting a winner.", job.getId());
-                notificationService.create(bid.getBidder(), NotificationType.AUCTION_CLOSED, msg, job.getId());
-                emailService.send(bid.getBidder().getEmail(),
-                        "ShipBidder: Auction closed for Job #" + job.getId(), msg);
+                        "Your auction for Job #%d closed with no bids received.", job.getId());
+                notificationService.create(job.getPoster(), NotificationType.AUCTION_CLOSED_NO_BIDS, msg, job.getId());
+                emailService.send(job.getPoster().getEmail(),
+                        "ShipBidder: No bids for Job #" + job.getId(), msg);
+                log.info("Job #{} → EXPIRED (zero bids)", job.getId());
+            } else {
+                job.setStatus(JobStatus.PENDING_AWARD);
+                int bidCount = bids.size();
+                String posterMsg = String.format(
+                        "Your auction for Job #%d has closed with %d bid%s. Review bids and select a winner.",
+                        job.getId(), bidCount, bidCount == 1 ? "" : "s");
+                notificationService.create(job.getPoster(), NotificationType.AUCTION_CLOSED, posterMsg, job.getId());
+                emailService.send(job.getPoster().getEmail(),
+                        "ShipBidder: Auction closed for Job #" + job.getId(), posterMsg);
+
+                for (Bid bid : bids) {
+                    String bidderMsg = String.format(
+                            "The auction for Job #%d has closed. The job poster is now selecting a winner.",
+                            job.getId());
+                    notificationService.create(bid.getBidder(), NotificationType.AUCTION_CLOSED, bidderMsg, job.getId());
+                    emailService.send(bid.getBidder().getEmail(),
+                            "ShipBidder: Auction closed for Job #" + job.getId(), bidderMsg);
+                }
+                log.info("Job #{} → PENDING_AWARD ({} bids)", job.getId(), bidCount);
             }
-            log.info("Job #{} → PENDING_AWARD ({} bids)", job.getId(), bids.size());
+        }
+    }
+
+    private void sendPendingAwardReminders(LocalDateTime now) {
+        LocalDateTime reminderCutoff = now.minusHours(gracePeriodHours / 2);
+        List<Job> jobs = jobRepository.findByStatusAndReminderSentFalseAndAuctionClosesAtBefore(
+                JobStatus.PENDING_AWARD, reminderCutoff);
+        for (Job job : jobs) {
+            int hoursLeft = gracePeriodHours / 2;
+            String msg = String.format(
+                    "Reminder: Job #%d still needs a winner. You have approximately %d hour%s left before it expires.",
+                    job.getId(), hoursLeft, hoursLeft == 1 ? "" : "s");
+            notificationService.create(job.getPoster(), NotificationType.AUCTION_CLOSE_REMINDER, msg, job.getId());
+            emailService.send(job.getPoster().getEmail(),
+                    "ShipBidder: Reminder — Job #" + job.getId() + " awaiting award", msg);
+            job.setReminderSent(true);
+            log.info("Job #{} → reminder sent to poster", job.getId());
         }
     }
 
@@ -61,14 +99,20 @@ public class AuctionScheduler {
         for (Job job : jobs) {
             job.setStatus(JobStatus.EXPIRED);
             List<Bid> bids = bidRepository.findByJobIdOrderByAmountAsc(job.getId());
+            String posterMsg = String.format(
+                    "Job #%d has expired without a winner being selected.", job.getId());
+            notificationService.create(job.getPoster(), NotificationType.JOB_EXPIRED, posterMsg, job.getId());
+            emailService.send(job.getPoster().getEmail(),
+                    "ShipBidder: Job #" + job.getId() + " has expired", posterMsg);
             for (Bid bid : bids) {
-                String msg = String.format(
-                        "Job #%d has expired without a winner being selected. Your bid has been released.", job.getId());
-                notificationService.create(bid.getBidder(), NotificationType.JOB_EXPIRED, msg, job.getId());
+                String bidderMsg = String.format(
+                        "Job #%d has expired without a winner being selected. Your bid has been released.",
+                        job.getId());
+                notificationService.create(bid.getBidder(), NotificationType.JOB_EXPIRED, bidderMsg, job.getId());
                 emailService.send(bid.getBidder().getEmail(),
-                        "ShipBidder: Job #" + job.getId() + " expired without a winner", msg);
+                        "ShipBidder: Job #" + job.getId() + " expired without a winner", bidderMsg);
             }
-            log.info("Job #{} → EXPIRED (no winner selected)", job.getId());
+            log.info("Job #{} → EXPIRED (grace period elapsed)", job.getId());
         }
     }
 }

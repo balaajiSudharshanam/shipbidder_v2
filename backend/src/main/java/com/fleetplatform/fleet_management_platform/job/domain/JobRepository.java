@@ -15,4 +15,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByPosterEmail(String email);
 
     List<Job> findByStatusAndAuctionClosesAtBefore(JobStatus status, LocalDateTime time);
+
+    List<Job> findByStatusAndReminderSentFalseAndAuctionClosesAtBefore(JobStatus status, LocalDateTime time);
 }

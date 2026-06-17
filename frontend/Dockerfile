@@ -1,5 +1,6 @@
 FROM node:22-alpine AS dev
 WORKDIR /app
+RUN npm install -g npm@latest
 COPY package*.json ./
 RUN npm ci
 COPY . .
@@ -10,6 +11,7 @@ FROM node:22-alpine AS build
 ARG VITE_GOOGLE_MAPS_API_KEY
 ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
 WORKDIR /app
+RUN npm install -g npm@latest
 COPY package*.json ./
 RUN npm ci
 COPY . .

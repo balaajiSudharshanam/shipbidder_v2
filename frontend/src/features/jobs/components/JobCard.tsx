@@ -9,11 +9,13 @@ interface Props {
 }
 
 const STATUS_STYLE: Record<string, { backgroundColor: string; color: string }> = {
-  OPEN:       { backgroundColor: 'var(--c-dark)', color: 'var(--c-light)' },
-  AWARDED:    { backgroundColor: 'var(--c-mid)',  color: 'var(--c-light)' },
-  IN_TRANSIT: { backgroundColor: 'var(--c-mid)',  color: 'var(--c-light)' },
-  COMPLETED:  { backgroundColor: 'rgba(28,27,27,0.1)', color: 'var(--c-dark)' },
-  CANCELLED:  { backgroundColor: 'rgba(28,27,27,0.08)', color: 'var(--c-mid)' },
+  OPEN:          { backgroundColor: 'var(--c-dark)', color: 'var(--c-light)' },
+  PENDING_AWARD: { backgroundColor: 'rgba(180,120,0,0.85)', color: 'var(--c-light)' },
+  AWARDED:       { backgroundColor: 'var(--c-mid)',  color: 'var(--c-light)' },
+  IN_TRANSIT:    { backgroundColor: 'var(--c-mid)',  color: 'var(--c-light)' },
+  COMPLETED:     { backgroundColor: 'rgba(28,27,27,0.1)', color: 'var(--c-dark)' },
+  CANCELLED:     { backgroundColor: 'rgba(28,27,27,0.08)', color: 'var(--c-mid)' },
+  EXPIRED:       { backgroundColor: 'rgba(28,27,27,0.08)', color: 'var(--c-mid)' },
 }
 
 const badgeBase: React.CSSProperties = {
@@ -82,6 +84,11 @@ export default function JobCard({ job, variant, hasPlacedBid = false, onClick }:
           >
             {hasPlacedBid ? 'Bid Placed' : 'Place Bid'}
           </button>
+        )}
+        {variant === 'poster' && job.status === 'PENDING_AWARD' && (
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(140,90,0,0.9)', letterSpacing: '0.03em' }}>
+            Select winner →
+          </span>
         )}
       </div>
     </div>

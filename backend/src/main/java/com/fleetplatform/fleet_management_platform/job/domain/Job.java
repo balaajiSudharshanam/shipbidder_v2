@@ -54,4 +54,8 @@ public class Job {
 
     @Column
     private LocalDate expectedDeliveryDate;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean reminderSent = false;
 }
